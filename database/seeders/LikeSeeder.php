@@ -12,12 +12,12 @@ class LikeSeeder extends Seeder
 {
     public function run()
     {
-        // Récupérer tous les utilisateurs
+        
         $users = User::all();
         
-        // Liker des posts
+       
         Post::all()->each(function ($post) use ($users) {
-            // Chaque post reçoit entre 0 et 5 likes aléatoires
+           
             $randomUsers = $users->random(rand(0, 5));
             
             foreach ($randomUsers as $user) {
@@ -27,7 +27,7 @@ class LikeSeeder extends Seeder
                     'likeable_type' => Post::class
                 ]);
                 
-                // Mettre à jour le compteur de likes
+                
                 $post->increment('likes_count');
             }
         });

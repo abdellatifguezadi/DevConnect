@@ -19,32 +19,34 @@
                                         </div>
                                         <div class="pt-14 p-4">
                                             <div class="flex items-center justify-between">
-                                                <h2 class="text-xl font-bold">Sarah Connor</h2>
-                                                <a href="https://github.com" target="_blank" class="text-gray-600 hover:text-black">
-                                                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
-                                                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.237 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-                                                    </svg>
-                                                </a>
+                                                <h2 class="text-xl font-bold">{{ $user->name }}</h2>
+                                                @if($user->profile && $user->profile->github_url)
+                                                    <a href="{{ $user->profile->github_url }}" target="_blank" class="text-gray-600 hover:text-black">
+                                                        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                                                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.237 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                                                        </svg>
+                                                    </a>
+                                                @endif
                                             </div>
-                                            <p class="text-gray-600 text-sm mt-1">Senior Full Stack Developer</p>
-                                            <p class="text-gray-500 text-sm mt-2">Building scalable web applications with modern technologies</p>
+                                            <p class="text-gray-600 text-sm mt-1">{{ $user->profile->title ?? 'Développeur' }}</p>
+                                            <p class="text-gray-500 text-sm mt-2">{{ $user->profile->bio ?? '' }}</p>
 
                                             <div class="mt-4 flex flex-wrap gap-2">
-                                                <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">JavaScript</span>
-                                                <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Node.js</span>
-                                                <span class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs">React</span>
-                                                <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs">Python</span>
-                                                <span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs">Docker</span>
+                                                @foreach($user->skills as $skill)
+                                                    <span class="px-2 py-1 bg-{{ $skill->category }}-100 text-{{ $skill->category }}-800 rounded-full text-xs">
+                                                        {{ $skill->name }}
+                                                    </span>
+                                                @endforeach
                                             </div>
 
                                             <div class="mt-4 pt-4 border-t">
                                                 <div class="flex justify-between text-sm">
                                                     <span class="text-gray-500">Connections</span>
-                                                    <span class="text-blue-600 font-medium">487</span>
+                                                    <span class="text-blue-600 font-medium">{{ $connectionsCount }}</span>
                                                 </div>
                                                 <div class="flex justify-between text-sm mt-2">
                                                     <span class="text-gray-500">Posts</span>
-                                                    <span class="text-blue-600 font-medium">52</span>
+                                                    <span class="text-blue-600 font-medium">{{ $postsCount }}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -54,18 +56,12 @@
                                     <div class="bg-white rounded-xl shadow-sm p-4">
                                         <h3 class="font-semibold mb-4">Trending Tags</h3>
                                         <div class="space-y-2">
-                                            <a href="#" class="flex items-center justify-between hover:bg-gray-50 p-2 rounded">
-                                                <span class="text-gray-600">#javascript</span>
-                                                <span class="text-gray-400 text-sm">2.4k</span>
-                                            </a>
-                                            <a href="#" class="flex items-center justify-between hover:bg-gray-50 p-2 rounded">
-                                                <span class="text-gray-600">#react</span>
-                                                <span class="text-gray-400 text-sm">1.8k</span>
-                                            </a>
-                                            <a href="#" class="flex items-center justify-between hover:bg-gray-50 p-2 rounded">
-                                                <span class="text-gray-600">#webdev</span>
-                                                <span class="text-gray-400 text-sm">1.2k</span>
-                                            </a>
+                                            @foreach($trendingTags as $tag)
+                                                <a href="#" class="flex items-center justify-between hover:bg-gray-50 p-2 rounded">
+                                                    <span class="text-gray-600">#{{ $tag->name }}</span>
+                                                    <span class="text-gray-400 text-sm">{{ number_format($tag->posts_count) }}</span>
+                                                </a>
+                                            @endforeach
                                         </div>
                                     </div>
                                 </div>
@@ -285,182 +281,154 @@
                                                     </div>
                                                     @endif
 
-                                                    <!-- Ajouter cette section juste avant la section des commentaires -->
-                                                    <div class="flex items-center space-x-4 mt-4">
-                                                        <form action="{{ route('posts.like', $post) }}" method="POST" class="flex items-center space-x-1">
+                                                    <!-- Actions du post (likes, commentaires, etc.) -->
+                                                    <div class="mt-4 flex items-center space-x-4">
+                                                        <form action="{{ route('posts.like', $post) }}" method="POST" class="flex items-center">
                                                             @csrf
-                                                            <button type="submit" class="text-gray-500 hover:text-blue-500 focus:outline-none">
-                                                                <svg class="w-6 h-6" fill="{{ $post->likes()->where('user_id', auth()->id())->exists() ? 'currentColor' : 'none' }}"
-                                                                    stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                                        d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+                                                            <button type="submit" class="flex items-center space-x-1 text-gray-500 hover:text-blue-500">
+                                                                <svg class="w-5 h-5 {{ $post->likes()->where('user_id', auth()->id())->exists() ? 'text-blue-500' : 'text-gray-500' }}" 
+                                                                     fill="{{ $post->likes()->where('user_id', auth()->id())->exists() ? 'currentColor' : 'none' }}" 
+                                                                     stroke="currentColor" 
+                                                                     viewBox="0 0 24 24">
+                                                                    <path stroke-linecap="round" 
+                                                                          stroke-linejoin="round" 
+                                                                          stroke-width="2" 
+                                                                          d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
                                                                 </svg>
+                                                                <span>{{ $post->likes_count }}</span>
                                                             </button>
-                                                            <span class="text-sm text-gray-500">{{ $post->likes_count }}</span>
                                                         </form>
 
-                                                        <!-- Bouton Commentaires -->
                                                         <button class="flex items-center space-x-1 text-gray-500 hover:text-blue-500">
-                                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" 
+                                                                      stroke-linejoin="round" 
+                                                                      stroke-width="2" 
+                                                                      d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                                                             </svg>
-                                                            <span class="text-sm">{{ $post->comments_count }}</span>
+                                                            <span>{{ $post->comments_count }}</span>
                                                         </button>
                                                     </div>
-                                                </div>
 
-                                                <div class="border-t mt-4 pt-4">
-                                                    <!-- Section Commentaires -->
-                                                    <div class="space-y-4">
-                                                        <!-- Formulaire d'ajout de commentaire -->
-                                                        <form action="{{ route('posts.comments.add', $post) }}" method="POST" class="flex space-x-3">
+                                                    <!-- Section des commentaires -->
+                                                    <div class="mt-4">
+                                                        <!-- Formulaire pour ajouter un commentaire -->
+                                                        <form action="{{ route('comments.store', $post) }}" method="POST" class="mb-4">
                                                             @csrf
-                                                            <img src="{{ auth()->user()->profile->avatar ?? 'https://avatar.iran.liara.run/public/boy' }}"
-                                                                alt="User"
-                                                                class="w-8 h-8 rounded-full" />
-                                                            <div class="flex-1">
-                                                                <textarea
-                                                                    name="content"
-                                                                    placeholder="Ajouter un commentaire..."
-                                                                    class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                                                    rows="1"></textarea>
-                                                                <button type="submit" class="mt-2 px-4 py-1.5 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600">
-                                                                    Commenter
-                                                                </button>
+                                                            <div class="flex items-start space-x-2">
+                                                                <img src="{{ auth()->user()->profile->avatar ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) }}" 
+                                                                     alt="Avatar" 
+                                                                     class="w-8 h-8 rounded-full">
+                                                                <div class="flex-1">
+                                                                    <textarea name="content" 
+                                                                              placeholder="Ajouter un commentaire..." 
+                                                                              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                                              rows="2"></textarea>
+                                                                    <button type="submit" 
+                                                                            class="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200">
+                                                                        Commenter
+                                                                    </button>
+                                                                </div>
                                                             </div>
                                                         </form>
 
                                                         <!-- Liste des commentaires -->
                                                         @foreach($post->comments->where('parent_id', null) as $comment)
-                                                        <div class="flex space-x-3">
-                                                            <img src="{{ $comment->user->profile->avatar ?? 'https://avatar.iran.liara.run/public/boy' }}"
-                                                                alt="{{ $comment->user->name }}"
-                                                                class="w-8 h-8 rounded-full" />
-                                                            <div class="flex-1">
-                                                                <div class="bg-gray-50 rounded-lg p-3">
-                                                                    <div class="flex justify-between items-start">
-                                                                        <div>
-                                                                            <h4 class="font-semibold text-sm">{{ $comment->user->name }}</h4>
-                                                                            <p class="text-gray-500 text-xs">{{ $comment->created_at->diffForHumans() }}</p>
+                                                            <div class="mb-4 bg-white rounded-lg shadow p-4">
+                                                                <div class="flex items-start space-x-3">
+                                                                    <img src="{{ $comment->user->profile->avatar ?? 'https://ui-avatars.com/api/?name=' . urlencode($comment->user->name) }}" 
+                                                                         alt="Avatar" 
+                                                                         class="w-8 h-8 rounded-full">
+                                                                    <div class="flex-1">
+                                                                        <div class="flex items-center justify-between">
+                                                                            <h4 class="font-semibold">{{ $comment->user->name }}</h4>
+                                                                            <span class="text-sm text-gray-500">{{ $comment->created_at->diffForHumans() }}</span>
                                                                         </div>
-                                                                        @if($comment->user_id === auth()->id())
-                                                                        <div class="relative" x-data="{ open: false }">
-                                                                            <button @click="open = !open" class="text-gray-400 hover:text-gray-600">
-                                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                                                        d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                                                                                </svg>
+                                                                        <p class="mt-1 text-gray-800">{{ $comment->content }}</p>
+
+                                                                        <!-- Actions sur le commentaire -->
+                                                                        <div class="mt-2 flex items-center space-x-4 text-sm">
+                                                                            <button onclick="toggleReplyInput('{{ $comment->id }}')" 
+                                                                                    class="text-gray-500 hover:text-blue-500">
+                                                                                Répondre
                                                                             </button>
-                                                                            <div x-show="open"
-                                                                                @click.away="open = false"
-                                                                                class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
-                                                                                <button @click="$dispatch('open-modal', 'edit-comment-{{ $comment->id }}')"
-                                                                                    class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                                            @if($comment->user_id === auth()->id())
+                                                                                <button onclick="toggleEditComment('{{ $comment->id }}')"
+                                                                                        class="text-gray-500 hover:text-blue-500">
                                                                                     Modifier
                                                                                 </button>
-                                                                                <form action="{{ route('comments.destroy', $comment) }}" method="POST">
+                                                                                <form action="{{ route('comments.destroy', $comment) }}" method="POST" class="inline">
                                                                                     @csrf
                                                                                     @method('DELETE')
-                                                                                    <button type="submit"
-                                                                                        class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
-                                                                                        Supprimer
-                                                                                    </button>
+                                                                                    <button type="submit" class="text-gray-500 hover:text-red-500">Supprimer</button>
                                                                                 </form>
-                                                                            </div>
-                                                                        </div>
-                                                                        @endif
-                                                                    </div>
-                                                                    <p class="text-gray-700 text-sm mt-1">{{ $comment->content }}</p>
-                                                                </div>
-
-                                                                <!-- Actions du commentaire -->
-                                                                <div class="flex items-center mt-2 space-x-4">
-                                                                    <button onclick="toggleReplyInput({{ $comment->id }})" class="text-sm text-blue-500 hover:text-blue-700">
-                                                                        Répondre
-                                                                    </button>
-                                                                </div>
-
-                                                                <!-- Champ de saisie pour répondre au commentaire -->
-                                                                <div id="reply-input-{{ $comment->id }}" style="display: none;" class="mt-2">
-                                                                    <form method="POST" action="{{ route('comments.reply', $comment) }}" class="flex space-x-3">
-                                                                        @csrf
-                                                                        <textarea name="content"
-                                                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                                                            rows="2"
-                                                                            required
-                                                                            placeholder="Votre réponse..."></textarea>
-                                                                        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
-                                                                            Répondre
-                                                                        </button>
-                                                                    </form>
-                                                                </div>
-
-                                                                <!-- Réponses aux commentaires -->
-                                                                @foreach($comment->replies as $reply)
-                                                                <div class="ml-8 mt-2 flex space-x-3">
-                                                                    <img src="{{ $reply->user->profile->avatar ?? 'https://avatar.iran.liara.run/public/boy' }}"
-                                                                        alt="{{ $reply->user->name }}"
-                                                                        class="w-6 h-6 rounded-full" />
-                                                                    <div class="flex-1 bg-gray-50 rounded-lg p-2">
-                                                                        <div class="flex justify-between items-start">
-                                                                            <div>
-                                                                                <h4 class="font-semibold text-sm">{{ $reply->user->name }}</h4>
-                                                                                <p class="text-gray-500 text-xs">{{ $reply->created_at->diffForHumans() }}</p>
-                                                                            </div>
-                                                                            @if($reply->user_id === auth()->id())
-                                                                            <!-- Menu suppression pour les réponses -->
-                                                                            <div class="relative" x-data="{ open: false }">
-                                                                                <button @click="open = !open" class="text-gray-400 hover:text-gray-600">
-                                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                                                            d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                                                                                    </svg>
-                                                                                </button>
-                                                                                <div x-show="open"
-                                                                                    @click.away="open = false"
-                                                                                    class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
-                                                                                    <form action="{{ route('comments.destroy', $reply) }}" method="POST">
-                                                                                        @csrf
-                                                                                        @method('DELETE')
-                                                                                        <button type="submit"
-                                                                                            class="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
-                                                                                            Supprimer
-                                                                                        </button>
-                                                                                    </form>
-                                                                                </div>
-                                                                            </div>
                                                                             @endif
                                                                         </div>
-                                                                        <p class="text-gray-700 text-sm mt-1">{{ $reply->content }}</p>
+
+                                                                        <!-- Formulaire de modification (caché par défaut) -->
+                                                                        <div id="edit-comment-{{ $comment->id }}" class="mt-3" style="display: none;">
+                                                                            <form action="{{ route('comments.update', $comment) }}" method="POST">
+                                                                                @csrf
+                                                                                @method('PUT')
+                                                                                <textarea name="content" 
+                                                                                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                                                          rows="2">{{ $comment->content }}</textarea>
+                                                                                <div class="mt-2 flex justify-end space-x-2">
+                                                                                    <button type="button" 
+                                                                                            onclick="toggleEditComment('{{ $comment->id }}')"
+                                                                                            class="px-3 py-1 text-gray-600 hover:text-gray-800">
+                                                                                        Annuler
+                                                                                    </button>
+                                                                                    <button type="submit" 
+                                                                                            class="px-3 py-1 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition duration-200">
+                                                                                        Sauvegarder
+                                                                                    </button>
+                                                                                </div>
+                                                                            </form>
+                                                                        </div>
+
+                                                                        <!-- Formulaire de réponse (caché par défaut) -->
+                                                                        <div id="reply-input-{{ $comment->id }}" class="mt-3 ml-8" style="display: none;">
+                                                                            <form action="{{ route('comments.reply', $comment) }}" method="POST">
+                                                                                @csrf
+                                                                                <div class="flex items-start space-x-2">
+                                                                                    <img src="{{ auth()->user()->profile->avatar ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) }}" 
+                                                                                         alt="Avatar" 
+                                                                                         class="w-6 h-6 rounded-full">
+                                                                                    <div class="flex-1">
+                                                                                        <textarea name="content" 
+                                                                                                  placeholder="Ajouter une réponse..." 
+                                                                                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                                                                  rows="2"></textarea>
+                                                                                        <button type="submit" 
+                                                                                                class="mt-2 px-3 py-1 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition duration-200">
+                                                                                            Répondre
+                                                                                        </button>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </form>
+                                                                        </div>
+
+                                                                        <!-- Réponses au commentaire -->
+                                                                        @foreach($comment->replies as $reply)
+                                                                            <div class="mt-3 ml-8 bg-gray-50 rounded-lg p-3">
+                                                                                <div class="flex items-start space-x-2">
+                                                                                    <img src="{{ $reply->user->profile->avatar ?? 'https://ui-avatars.com/api/?name=' . urlencode($reply->user->name) }}" 
+                                                                                         alt="Avatar" 
+                                                                                         class="w-6 h-6 rounded-full">
+                                                                                    <div class="flex-1">
+                                                                                        <div class="flex items-center justify-between">
+                                                                                            <h5 class="font-semibold text-sm">{{ $reply->user->name }}</h5>
+                                                                                            <span class="text-xs text-gray-500">{{ $reply->created_at->diffForHumans() }}</span>
+                                                                                        </div>
+                                                                                        <p class="mt-1 text-sm text-gray-800">{{ $reply->content }}</p>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        @endforeach
                                                                     </div>
                                                                 </div>
-                                                                @endforeach
-
-                                                                <!-- Modal pour modifier le commentaire -->
-                                                                <x-modal name="edit-comment-{{ $comment->id }}" :show="false" focusable>
-                                                                    <form method="POST" action="{{ route('comments.update', $comment) }}" class="p-6">
-                                                                        @csrf
-                                                                        @method('PUT')
-                                                                        <h2 class="text-lg font-medium text-gray-900">Modifier le commentaire</h2>
-                                                                        <div class="mt-6">
-                                                                            <textarea name="content"
-                                                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                                                                rows="3"
-                                                                                required>{{ $comment->content }}</textarea>
-                                                                        </div>
-                                                                        <div class="mt-6 flex justify-end">
-                                                                            <x-secondary-button x-on:click="$dispatch('close')">
-                                                                                Annuler
-                                                                            </x-secondary-button>
-                                                                            <x-primary-button class="ml-3">
-                                                                                Mettre à jour
-                                                                            </x-primary-button>
-                                                                        </div>
-                                                                    </form>
-                                                                </x-modal>
                                                             </div>
-                                                        </div>
                                                         @endforeach
                                                     </div>
                                                 </div>
@@ -469,31 +437,59 @@
 
                                         <!-- Modal pour modifier le post -->
                                         <x-modal name="edit-post-{{ $post->id }}" focusable>
-                                            <form method="POST" action="{{ route('posts.update', $post) }}" class="p-6">
+                                            <form method="POST" action="{{ route('posts.update', $post) }}" class="p-6" enctype="multipart/form-data">
                                                 @csrf
                                                 @method('PUT')
                                                 <h2 class="text-lg font-medium text-gray-900">Modifier le post</h2>
                                                 <div class="mt-6">
                                                     <textarea name="content"
-                                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-1"
                                                         rows="4"
                                                         required>{{ $post->content }}</textarea>
                                                 </div>
+
+                                                <!-- Affichage du code snippet -->
                                                 @if($post->code_snippet)
-                                                <div class="mt-4">
-                                                    <label class="block text-sm font-medium text-gray-700">Code</label>
-                                                    <textarea name="code_snippet"
-                                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 font-mono"
-                                                        rows="4">{{ $post->code_snippet }}</textarea>
-                                                </div>
-                                                <div class="mt-4">
-                                                    <label class="block text-sm font-medium text-gray-700">Langage</label>
-                                                    <input type="text"
-                                                        name="programming_language"
-                                                        value="{{ $post->programming_language }}"
-                                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                                </div>
+                                                    <div class="mt-4">
+                                                        <label class="block text-sm font-medium text-gray-700">Code</label>
+                                                        <textarea name="code_snippet"
+                                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 font-mono px-2 py-1 "
+                                                            rows="4">{{ $post->code_snippet }}</textarea>
+                                                    </div>
                                                 @endif
+
+                                                <!-- Affichage des médias existants -->
+                                                @if($post->media)
+                                                    @if(isset($post->media['images']))
+                                                        <div class="mt-4">
+                                                            <h3 class="font-semibold">Images existantes :</h3>
+                                                            @foreach($post->media['images'] as $image)
+                                                                <img src="{{ $image }}" alt="Image du post" class="mt-2 w-64 rounded-md">
+                                                            @endforeach
+                                                            <div class="mt-2">
+                                                                <label class="block text-sm font-medium text-gray-700">Remplacer l'image :</label>
+                                                                <input type="file" name="image" accept="image/*" class="mt-1 block w-full">
+                                                            </div>
+                                                        </div>
+                                                    @endif
+
+                                                    @if(isset($post->media['videos']))
+                                                        <div class="mt-4">
+                                                            <h3 class="font-semibold">Vidéos existantes :</h3>
+                                                            @foreach($post->media['videos'] as $video)
+                                                                <video controls class="mt-2 w-64 rounded-md">
+                                                                    <source src="{{ $video }}" type="video/mp4">
+                                                                    Votre navigateur ne supporte pas la lecture de vidéos.
+                                                                </video>
+                                                            @endforeach
+                                                            <div class="mt-2">
+                                                                <label class="block text-sm font-medium text-gray-700">Remplacer la vidéo :</label>
+                                                                <input type="file" name="video" accept="video/*" class="mt-1 block w-full">
+                                                            </div>
+                                                        </div>
+                                                    @endif
+                                                @endif
+
                                                 <div class="mt-6 flex justify-end">
                                                     <x-secondary-button x-on:click="$dispatch('close')">
                                                         Annuler
@@ -545,6 +541,15 @@
             replyInput.style.display = "block";
         } else {
             replyInput.style.display = "none";
+        }
+    }
+
+    function toggleEditComment(commentId) {
+        const editComment = document.getElementById(`edit-comment-${commentId}`);
+        if (editComment.style.display === "none" || editComment.style.display === "") {
+            editComment.style.display = "block";
+        } else {
+            editComment.style.display = "none";
         }
     }
 </script>

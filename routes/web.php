@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\LikeController;
+use App\Http\Controllers\CommentController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -20,16 +21,23 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', [PostController::class, 'index'])->name('dashboard');
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
-    Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
     Route::put('/posts/{post}', [PostController::class, 'update'])->name('posts.update');
-    Route::post('/posts/{post}/like', [LikeController::class, 'togglePostLike'])->name('posts.like');
-    
+    Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
+    Route::post('/posts/{post}/like', [PostController::class, 'toggleLike'])->name('posts.like');
+    Route::post('/posts/{post}/comments', [CommentController::class, 'store'])->name('comments.store');
+
+    // Profile routes
+    Route::get('/profile/{user}', [ProfileController::class, 'show'])->name('profile.show');
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile/update', [ProfileController::class, 'updateProfile'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
     // Routes des commentaires
-    Route::post('/posts/{post}/comments', [PostController::class, 'addComment'])->name('posts.comments.add');
-    Route::put('/comments/{comment}', [PostController::class, 'updateComment'])->name('comments.update');
-    Route::delete('/comments/{comment}', [PostController::class, 'deleteComment'])->name('comments.destroy');
-    Route::post('/comments/{comment}/reply', [PostController::class, 'replyToComment'])->name('comments.reply');
+    Route::put('/comments/{comment}', [CommentController::class, 'update'])->name('comments.update');
+    Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
+    Route::post('/comments/{comment}/reply', [CommentController::class, 'reply'])->name('comments.reply');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

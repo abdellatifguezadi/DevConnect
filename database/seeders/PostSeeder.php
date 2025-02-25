@@ -12,8 +12,8 @@ class PostSeeder extends Seeder
     {
         $hashtags = Hashtag::all();
 
-        Post::factory(200)->create()->each(function ($post) use ($hashtags) {
-            // Attacher des hashtags aléatoires aux posts
+        Post::factory(10)->create()->each(function ($post) use ($hashtags) {
+           
             $post->hashtags()->attach(
                 $hashtags->random(rand(1, 5))->pluck('id')->toArray()
             );

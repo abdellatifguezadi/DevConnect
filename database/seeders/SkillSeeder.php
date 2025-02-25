@@ -12,7 +12,6 @@ class SkillSeeder extends Seeder
     {
         $skills = Skill::factory(20)->create();
 
-        // Attribuer des compétences aux utilisateurs
         User::all()->each(function ($user) use ($skills) {
             $user->skills()->attach(
                 $skills->random(rand(3, 8))->pluck('id')->toArray(),

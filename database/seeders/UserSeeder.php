@@ -10,14 +10,14 @@ class UserSeeder extends Seeder
 {
     public function run()
     {
-        User::factory(50)
+        User::factory(3)
             ->has(UserProfile::factory(), 'profile')
             ->create()
             ->each(function ($user) {
-                // Créer des connexions entre utilisateurs
+                
                 $otherUsers = User::where('id', '!=', $user->id)
                     ->inRandomOrder()
-                    ->limit(rand(5, 15))
+                    ->limit(rand(1, 3))
                     ->get();
 
                 foreach ($otherUsers as $otherUser) {

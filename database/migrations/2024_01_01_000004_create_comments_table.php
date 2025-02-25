@@ -12,10 +12,19 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('post_id')->constrained()->onDelete('cascade');
+            $table->unsignedBigInteger('parent_id')->nullable();
             $table->text('content');
-            $table->foreignId('parent_id')->nullable()->constrained('comments')->onDelete('cascade');
+            $table->integer('likes_count')->default(0);
             $table->timestamps();
             $table->softDeletes();
+        });
+
+        // Ajouter la contrainte de clé étrangère après la création de la table
+        Schema::table('comments', function (Blueprint $table) {
+            $table->foreign('parent_id')
+                  ->references('id')
+                  ->on('comments')
+                  ->onDelete('cascade');
         });
     }
 

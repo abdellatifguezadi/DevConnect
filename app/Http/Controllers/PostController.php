@@ -3,21 +3,41 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Models\User;
 use App\Models\Comment;
 use Illuminate\Http\Request;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+
 
 class PostController extends Controller
 {
-    use AuthorizesRequests;
+    
 
     public function index()
     {
+        
+        $user = auth()->user()->load('profile', 'skills');
+        
+        
+        $connectionsCount = \App\Models\Connection::where(function($query) {
+            $query->where('requester_id', auth()->id())
+                  ->orWhere('requested_id', auth()->id());
+        })->where('status', 'accepted')->count();
+        
+        
+        $postsCount = $user->posts()->count();
+        
+       
+        $trendingTags = \App\Models\Hashtag::orderBy('posts_count', 'desc')
+            ->take(5)
+            ->get();
+        
+        
         $posts = auth()->user()->connectedUsersPosts()
             ->with(['user.profile', 'comments.user', 'hashtags'])
+            ->latest()
             ->paginate(10);
 
-        return view('dashboard', compact('posts'));
+        return view('dashboard', compact('posts', 'user', 'connectionsCount', 'postsCount', 'trendingTags'));
     }
 
     public function store(Request $request)
@@ -26,8 +46,14 @@ class PostController extends Controller
             'content' => 'required|max:5000',
             'code_snippet' => 'nullable|string',
             'programming_language' => 'nullable|string',
-            'image' => 'nullable|image|max:5120', 
-            'video' => 'nullable|mimes:mp4,mov,avi|max:102400', 
+            'image' => 'nullable|image|max:5120',
+            'video' => 'nullable|mimes:mp4,mov,avi|max:102400',
+        ]);
+
+        $post = auth()->user()->posts()->create([
+            'content' => $request->content,
+            'code_snippet' => $request->code_snippet,
+            'programming_language' => $request->programming_language,
         ]);
 
         $media = [];
@@ -42,12 +68,10 @@ class PostController extends Controller
             $media['videos'] = [asset('storage/' . $path)];
         }
 
-        auth()->user()->posts()->create([
-            'content' => $request->content,
-            'code_snippet' => $request->code_snippet,
-            'programming_language' => $request->programming_language,
-            'media' => !empty($media) ? $media : null,
-        ]);
+        if (!empty($media)) {
+            $post->media = $media;
+            $post->save();
+        }
 
         return back()->with('success', 'Post créé avec succès');
     }
@@ -62,9 +86,38 @@ class PostController extends Controller
             'content' => 'required|max:5000',
             'code_snippet' => 'nullable|string',
             'programming_language' => 'nullable|string',
+            'image' => 'nullable|image|max:5120', 
+            'video' => 'nullable|mimes:mp4,mov,avi|max:102400', 
         ]);
 
         $post->update($request->only(['content', 'code_snippet', 'programming_language']));
+
+        $media = $post->media ?? [];
+
+        if ($request->hasFile('image')) {
+            if (isset($media['images']) && !empty($media['images'])) {
+                foreach ($media['images'] as $image) {
+                    \Storage::disk('public')->delete(str_replace('storage/', '', $image));
+                }
+            }
+            $path = $request->file('image')->store('posts/images', 'public');
+            $media['images'] = [asset('storage/' . $path)];
+        }
+
+        if ($request->hasFile('video')) {
+            if (isset($media['videos']) && !empty($media['videos'])) {
+                foreach ($media['videos'] as $video) {
+                    \Storage::disk('public')->delete(str_replace('storage/', '', $video));
+                }
+            }
+            $path = $request->file('video')->store('posts/videos', 'public');
+            $media['videos'] = [asset('storage/' . $path)];
+        }
+
+        if (!empty($media)) {
+            $post->media = $media;
+            $post->save();
+        }
 
         return back()->with('success', 'Post mis à jour avec succès');
     }
