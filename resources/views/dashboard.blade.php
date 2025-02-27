@@ -74,7 +74,7 @@
                                             @foreach($trendingTags as $tag)
                                             <a href="#" class="flex items-center justify-between hover:bg-gray-50 p-2 rounded">
                                                 <span class="text-gray-600">#{{ $tag->name }}</span>
-                                                <span class="text-gray-400 text-sm">{{ number_format($tag->posts_count) }}</span>
+                                                <span class="text-gray-400 text-sm">{{ number_format($tag->hashtag_posts_count) }}</span>
                                             </a>
                                             @endforeach
                                         </div>
@@ -287,38 +287,39 @@
                                                     @endif
 
                                                     <div class="mt-4 flex items-center space-x-4">
-                                                        <form action="{{ route('posts.like', $post) }}" method="POST" class="flex items-center">
-                                                            @csrf
-                                                            <button type="submit" class="flex items-center space-x-1 text-gray-500 hover:text-blue-500">
-                                                                <svg class="w-5 h-5 {{ $post->likes()->where('user_id', auth()->id())->exists() ? 'text-blue-500' : 'text-gray-500' }}"
-                                                                    fill="{{ $post->likes()->where('user_id', auth()->id())->exists() ? 'currentColor' : 'none' }}"
-                                                                    stroke="currentColor"
-                                                                    viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round"
-                                                                        stroke-linejoin="round"
-                                                                        stroke-width="2"
-                                                                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                                                </svg>
-                                                                <span>{{ $post->likes_count }}</span>
-                                                            </button>
-                                                        </form>
+                                                        <button class="like-button flex items-center space-x-1" data-post-id="{{ $post->id }}">
+                                                            <svg class="w-5 h-5 {{ $post->isLikedByUser(auth()->user()) ? 'text-blue-500' : 'text-gray-500' }}"
+                                                                fill="{{ $post->isLikedByUser(auth()->user()) ? 'currentColor' : 'none' }}"
+                                                                stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
+                                                                </path>
+                                                            </svg>
+                                                            <span class="like-count">{{ $post->likes_count }}</span>
+                                                        </button>
 
-                                                        <button class="flex items-center space-x-1 text-gray-500 hover:text-blue-500">
+                                                        <button class="flex items-center space-x-1 text-gray-500 hover:text-blue-500" onclick="document.getElementById('comments-{{ $post->id }}').classList.toggle('hidden')" data-post-id="{{ $post->id }}">
                                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round"
                                                                     stroke-linejoin="round"
                                                                     stroke-width="2"
                                                                     d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                                                             </svg>
-                                                            <span>{{ $post->comments_count }}</span>
+                                                            <span class="comment-count" data-post-id="{{ $post->id }}">{{ $post->comments_count }}</span>
                                                         </button>
                                                     </div>
 
-                                                    <div class="mt-4">
-                                                        <form action="{{ route('comments.store', $post) }}" method="POST" class="mb-4">
+                                                    <div id="comments-{{ $post->id }}" class="mt-4 hidden">
+                                                        <div class="comments-list">
+                                                            @foreach($post->comments->whereNull('parent_id') as $comment)
+                                                                <x-comment :comment="$comment" />
+                                                            @endforeach
+                                                        </div>
+
+                                                        <form action="{{ route('comments.store', $post) }}" method="POST" class="comment-form mt-4" data-post-id="{{ $post->id }}">
                                                             @csrf
                                                             <div class="flex items-start space-x-2">
-                                                                <img src="{{ auth()->user()->profile->avatar ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) }}"
+                                                                <img src="{{ auth()->user()->profile?->avatar ?? 'https://avatar.iran.liara.run/public/boy' }}"
                                                                     alt="Avatar"
                                                                     class="w-8 h-8 rounded-full">
                                                                 <div class="flex-1">
@@ -333,145 +334,6 @@
                                                                 </div>
                                                             </div>
                                                         </form>
-
-                                                        @foreach($post->comments->where('parent_id', null) as $comment)
-                                                        <div class="mb-4 bg-white rounded-lg shadow p-4">
-                                                            <div class="flex items-start space-x-3">
-                                                                <img src="{{ $comment->user->profile->avatar ?? 'https://ui-avatars.com/api/?name=' . urlencode($comment->user->name) }}"
-                                                                    alt="Avatar"
-                                                                    class="w-8 h-8 rounded-full">
-                                                                <div class="flex-1">
-                                                                    <div class="flex items-center justify-between">
-                                                                        <h4 class="font-semibold">{{ $comment->user->name }}</h4>
-                                                                        <span class="text-sm text-gray-500">{{ $comment->created_at->diffForHumans() }}</span>
-                                                                    </div>
-                                                                    <p class="mt-1 text-gray-800">{{ $comment->content }}</p>
-
-                                                                    <div class="mt-2 flex items-center space-x-4 text-sm">
-                                                                        <button onclick="toggleReplyInput('{{ $comment->id }}')"
-                                                                            class="text-gray-500 hover:text-blue-500">
-                                                                            Répondre
-                                                                        </button>
-                                                                        @if($comment->user_id === auth()->id())
-                                                                        <button onclick="toggleEditComment('{{ $comment->id }}')"
-                                                                            class="text-gray-500 hover:text-blue-500">
-                                                                            Modifier
-                                                                        </button>
-                                                                        <form action="{{ route('comments.destroy', $comment) }}" method="POST" class="inline">
-                                                                            @csrf
-                                                                            @method('DELETE')
-                                                                            <button type="submit" class="text-gray-500 hover:text-red-500">Supprimer</button>
-                                                                        </form>
-                                                                        @endif
-                                                                    </div>
-
-
-                                                                    <div id="edit-comment-{{ $comment->id }}" class="mt-3" style="display: none;">
-                                                                        <form action="{{ route('comments.update', $comment) }}" method="POST">
-                                                                            @csrf
-                                                                            @method('PUT')
-                                                                            <textarea name="content"
-                                                                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                                                rows="2">{{ $comment->content }}</textarea>
-                                                                            <div class="mt-2 flex justify-end space-x-2">
-                                                                                <button type="button"
-                                                                                    onclick="toggleEditComment('{{ $comment->id }}')"
-                                                                                    class="px-3 py-1 text-gray-600 hover:text-gray-800">
-                                                                                    Annuler
-                                                                                </button>
-                                                                                <button type="submit"
-                                                                                    class="px-3 py-1 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition duration-200">
-                                                                                    Sauvegarder
-                                                                                </button>
-                                                                            </div>
-                                                                        </form>
-                                                                    </div>
-
-                                                                    <div id="reply-input-{{ $comment->id }}" class="mt-3 ml-8" style="display: none;">
-                                                                        <form action="{{ route('comments.reply', $comment) }}" method="POST">
-                                                                            @csrf
-                                                                            <div class="flex items-start space-x-2">
-                                                                                <img src="{{ auth()->user()->profile->avatar ?? 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) }}"
-                                                                                    alt="Avatar"
-                                                                                    class="w-6 h-6 rounded-full">
-                                                                                <div class="flex-1">
-                                                                                    <textarea name="content"
-                                                                                        placeholder="Ajouter une réponse..."
-                                                                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                                                                        rows="2"></textarea>
-                                                                                    <button type="submit"
-                                                                                        class="mt-2 px-3 py-1 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition duration-200">
-                                                                                        Répondre
-                                                                                    </button>
-                                                                                </div>
-                                                                            </div>
-                                                                        </form>
-                                                                    </div>
-
-                                                                    @foreach($comment->replies as $reply)
-                                                                    <div class="mt-3 ml-8 bg-gray-50 rounded-lg p-3">
-                                                                        <div class="flex items-start space-x-2">
-                                                                            <img src="{{ $reply->user->profile->avatar ?? 'https://ui-avatars.com/api/?name=' . urlencode($reply->user->name) }}"
-                                                                                alt="Avatar"
-                                                                                class="w-6 h-6 rounded-full">
-                                                                            <div class="flex-1">
-                                                                                <div class="flex items-center justify-between">
-                                                                                    <h5 class="font-semibold text-sm">{{ $reply->user->name }}</h5>
-                                                                                    <div class="flex items-center space-x-2">
-                                                                                        <span class="text-xs text-gray-500">{{ $reply->created_at->diffForHumans() }}</span>
-                                                                                        @if($reply->user_id === auth()->id())
-                                                                                        <button onclick="toggleEditComment('reply-{{ $reply->id }}')"
-                                                                                            class="text-gray-500 hover:text-blue-500 ml-2">
-                                                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                                                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                                                            </svg>
-                                                                                        </button>
-                                                                                        <form action="{{ route('comments.destroy', $reply) }}" method="POST" class="inline">
-                                                                                            @csrf
-                                                                                            @method('DELETE')
-                                                                                            <button type="submit"
-
-                                                                                                class="text-gray-500 hover:text-red-500">
-                                                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                                                                </svg>
-                                                                                            </button>
-                                                                                        </form>
-                                                                                        @endif
-                                                                                    </div>
-                                                                                </div>
-                                                                                <p class="mt-1 text-sm text-gray-800" id="reply-content-{{ $reply->id }}">{{ $reply->content }}</p>
-
-                                                                                <div id="edit-comment-reply-{{ $reply->id }}" class="mt-2" style="display: none;">
-                                                                                    <form action="{{ route('comments.update', $reply) }}" method="POST">
-                                                                                        @csrf
-                                                                                        @method('PUT')
-                                                                                        <textarea name="content"
-                                                                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                                                                                            rows="2">{{ $reply->content }}</textarea>
-                                                                                        <div class="mt-2 flex justify-end space-x-2">
-                                                                                            <button type="button"
-                                                                                                onclick="toggleEditComment('reply-{{ $reply->id }}')"
-                                                                                                class="px-3 py-1 text-xs text-gray-600 hover:text-gray-800">
-                                                                                                Annuler
-                                                                                            </button>
-                                                                                            <button type="submit"
-                                                                                                class="px-3 py-1 bg-blue-500 text-white text-xs rounded-lg hover:bg-blue-600 transition duration-200">
-                                                                                                Sauvegarder
-                                                                                            </button>
-                                                                                        </div>
-                                                                                    </form>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                    @endforeach
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        @endforeach
                                                     </div>
                                                 </div>
                                             </div>

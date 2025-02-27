@@ -14,9 +14,10 @@ class Comment extends Model
         'user_id',
         'post_id',
         'parent_id',
-        'content',
-        'likes_count'
+        'content'
     ];
+
+    protected $with = ['user'];
 
     public function user()
     {
@@ -31,5 +32,15 @@ class Comment extends Model
     public function replies()
     {
         return $this->hasMany(Comment::class, 'parent_id');
+    }
+
+    public function parent()
+    {
+        return $this->belongsTo(Comment::class, 'parent_id');
+    }
+
+    public function likes()
+    {
+        return $this->morphMany(Like::class, 'likeable');
     }
 } 

@@ -136,169 +136,81 @@
                                 @endif
                             </div>
 
-                            <div class="mt-4 flex items-center justify-between border-t pt-4">
-                                <div class="flex space-x-4">
-                                    <form action="{{ route('posts.like', $post) }}" method="POST" class="inline">
-                                        @csrf
-                                        <button type="submit"
-                                            class="flex items-center space-x-2 {{ $post->likes()->where('user_id', auth()->id())->exists() ? 'text-indigo-600' : 'text-gray-500' }} hover:text-indigo-600 transition-colors">
-                                            <svg class="w-5 h-5"
-                                                fill="{{ $post->likes()->where('user_id', auth()->id())->exists() ? 'currentColor' : 'none' }}"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24">
-                                                <path stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                            </svg>
-                                            <span>{{ $post->likes_count ?? 0 }}</span>
-                                        </button>
-                                    </form>
-                                    <button onclick="toggleComments('{{ $post->id }}')"
-                                        class="flex items-center space-x-2 text-gray-500 hover:text-indigo-600 transition-colors">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                                        </svg>
-                                        <span>{{ $post->comments_count ?? 0 }}</span>
-                                    </button>
-                                </div>
-                                @if(auth()->id() === $post->user_id)
-                                <div class="flex space-x-2">
-                                    <button onclick="openEditPost('{{ $post->id }}', '{{ $post->content }}')"
-                                        class="text-blue-600 hover:text-blue-800">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                        </svg>
-                                    </button>
-                                    <form action="{{ route('posts.destroy', $post) }}" method="POST" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                            onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette publication ?')"
-                                            class="text-red-600 hover:text-red-800">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                            </svg>
-                                        </button>
-                                    </form>
-                                </div>
-                                @endif
+                            <div class="mt-4 flex items-center space-x-4">
+                                <button class="flex items-center space-x-1 text-gray-500 hover:text-blue-500 like-button" data-post-id="{{ $post->id }}">
+                                    <svg class="w-5 h-5 {{ $post->likes()->where('user_id', auth()->id())->exists() ? 'text-blue-500' : 'text-gray-500' }}"
+                                        fill="{{ $post->likes()->where('user_id', auth()->id())->exists() ? 'currentColor' : 'none' }}"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                    </svg>
+                                    <span class="like-count">{{ $post->likes_count }}</span>
+                                </button>
+
+                                <button class="flex items-center space-x-1 text-gray-500 hover:text-blue-500" onclick="document.getElementById('comments-{{ $post->id }}').classList.toggle('hidden')">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                    </svg>
+                                    <span class="comment-count">{{ $post->comments_count }}</span>
+                                </button>
                             </div>
 
                             <div id="comments-{{ $post->id }}" class="mt-4 hidden">
-                                <div class="space-y-4">
-                                    @if($post->comments)
+                                <div class="comments-list">
                                     @foreach($post->comments->whereNull('parent_id') as $comment)
-                                    <div class="flex space-x-3 bg-gray-50 p-3 rounded-lg">
-                                        <img src="{{ $comment->user->profile?->avatar ?? 'https://avatar.iran.liara.run/public/boy' }}"
-                                            class="w-8 h-8 rounded-full object-cover"
-                                            alt="{{ $comment->user->name }}">
-                                        <div class="flex-1">
-                                            <div class="flex items-center justify-between">
-                                                <h4 class="text-sm font-semibold text-gray-900">{{ $comment->user->name }}</h4>
-                                                <div class="flex items-center space-x-2">
-                                                    <p class="text-xs text-gray-500">{{ $comment->created_at->diffForHumans() }}</p>
-                                                    @if(auth()->id() === $comment->user_id)
-                                                    <button onclick="toggleEditComment('{{ $comment->id }}')"
-                                                        class="text-blue-600 hover:text-blue-800">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                        </svg>
-                                                    </button>
-                                                    <form action="{{ route('comments.destroy', $comment) }}" method="POST" class="inline">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="text-red-600 hover:text-red-800">
-                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                            </svg>
-                                                        </button>
-                                                    </form>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                            <p class="text-sm text-gray-700 mt-1">{{ $comment->content }}</p>
-
-                                            @foreach($comment->replies as $reply)
-                                            <div class="ml-8 mt-2 flex space-x-3 bg-gray-100 p-3 rounded-lg" id="reply-{{ $reply->id }}">
-                                                <img src="{{ $reply->user->profile?->avatar ?? 'https://avatar.iran.liara.run/public/boy' }}"
-                                                    class="w-6 h-6 rounded-full object-cover"
-                                                    alt="{{ $reply->user->name }}">
-                                                <div class="flex-1">
-                                                    <div class="flex items-center justify-between">
-                                                        <h4 class="text-sm font-semibold text-gray-900">{{ $reply->user->name }}</h4>
-                                                        <div class="flex items-center space-x-2">
-                                                            <p class="text-xs text-gray-500">{{ $reply->created_at->diffForHumans() }}</p>
-                                                            @if(auth()->id() === $reply->user_id)
-                                                            <button onclick="editReply('{{ $reply->id }}', '{{ $reply->content }}')"
-                                                                class="text-blue-600 hover:text-blue-800">
-                                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                                </svg>
-                                                            </button>
-                                                            <form action="{{ route('comments.replies.destroy', ['comment' => $comment->id, 'reply' => $reply->id]) }}"
-                                                                method="POST" class="inline">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                                <button type="submit" class="text-red-600 hover:text-red-800">
-                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                                    </svg>
-                                                                </button>
-                                                            </form>
-                                                            @endif
-                                                        </div>
-                                                    </div>
-                                                    <p class="text-sm text-gray-700 mt-1">{{ $reply->content }}</p>
-                                                </div>
-                                            </div>
-                                            @endforeach
-
-                                            <form action="{{ route('comments.reply', $comment) }}" method="POST" class="mt-2 ml-8 flex space-x-2">
-                                                @csrf
-                                                <div class="flex-1 flex space-x-2">
-                                                    <img src="{{ auth()->user()->profile?->avatar ?? 'https://avatar.iran.liara.run/public/boy' }}"
-                                                        class="w-6 h-6 rounded-full object-cover"
-                                                        alt="{{ auth()->user()->name }}">
-                                                    <input type="text" name="content"
-                                                        class="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                                        placeholder="Répondre à ce commentaire...">
-                                                </div>
-                                                <button type="submit"
-                                                    class="px-3 py-2 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors">
-                                                    Répondre
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </div>
+                                        <x-comment :comment="$comment" />
                                     @endforeach
-                                    @endif
+                                </div>
 
-                                    <!-- Formulaire pour ajouter un commentaire -->
-                                    <form action="{{ route('comments.store', $post) }}" method="POST" class="flex space-x-2">
-                                        @csrf
+                                <form action="{{ route('comments.store', $post) }}" method="POST" class="comment-form mt-4" data-post-id="{{ $post->id }}">
+                                    @csrf
+                                    <div class="flex items-start space-x-2">
                                         <img src="{{ auth()->user()->profile?->avatar ?? 'https://avatar.iran.liara.run/public/boy' }}"
-                                            class="w-8 h-8 rounded-full object-cover"
-                                            alt="{{ auth()->user()->name }}">
+                                            alt="Avatar"
+                                            class="w-8 h-8 rounded-full">
                                         <div class="flex-1">
-                                            <input type="text" name="content"
-                                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                                placeholder="Ajouter un commentaire...">
+                                            <textarea name="content"
+                                                placeholder="Ajouter un commentaire..."
+                                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                rows="2"></textarea>
                                             <button type="submit"
-                                                class="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                                                class="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200">
                                                 Commenter
                                             </button>
                                         </div>
-                                    </form>
-                                </div>
+                                    </div>
+                                </form>
                             </div>
+
+                            @if(auth()->id() === $post->user_id)
+                            <div class="flex space-x-2">
+                                <button onclick="openEditPost('{{ $post->id }}', '{{ $post->content }}')"
+                                    class="text-blue-600 hover:text-blue-800">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                </button>
+                                <form action="{{ route('posts.destroy', $post) }}" method="POST" class="inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit"
+                                        onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette publication ?')"
+                                        class="text-red-600 hover:text-red-800">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </form>
+                            </div>
+                            @endif
                         </div>
                     </div>
                     @empty
@@ -341,59 +253,5 @@
     </div>
 </div>
 
-    <script>
-        function openEditProfile() {
-            document.getElementById('editProfileModal').classList.remove('hidden');
-        }
-
-        function closeEditProfile() {
-            document.getElementById('editProfileModal').classList.add('hidden');
-        }
-
-        function toggleComments(postId) {
-            const commentsSection = document.getElementById(`comments-${postId}`);
-            commentsSection.classList.toggle('hidden');
-        }
-
-        let currentPostId = null;
-
-        function openEditPost(postId, content) {
-            currentPostId = postId;
-            document.getElementById('editPostContent').value = content;
-            document.getElementById('editPostForm').action = `/posts/${postId}`;
-            document.getElementById('editPostModal').classList.remove('hidden');
-        }
-
-        function closeEditPost() {
-            document.getElementById('editPostModal').classList.add('hidden');
-            currentPostId = null;
-        }
-
-
-        window.onclick = function(event) {
-            const editPostModal = document.getElementById('editPostModal');
-            const editProfileModal = document.getElementById('editProfileModal');
-
-            if (event.target == editPostModal) {
-                closeEditPost();
-            }
-            if (event.target == editProfileModal) {
-                closeEditProfile();
-            }
-        }
-
-        function editReply(replyId, content) {
-
-            document.getElementById(`reply-content-${replyId}`).classList.add('hidden');
-
-            document.getElementById(`reply-edit-form-${replyId}`).classList.remove('hidden');
-        }
-
-        function cancelEditReply(replyId) {
-
-            document.getElementById(`reply-content-${replyId}`).classList.remove('hidden');
-
-            document.getElementById(`reply-edit-form-${replyId}`).classList.add('hidden');
-        }
-    </script>
+    <script src="{{ asset('js/profile.js') }}"></script>
 </x-app-layout>

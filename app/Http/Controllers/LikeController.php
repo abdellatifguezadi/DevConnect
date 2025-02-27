@@ -7,22 +7,38 @@ use Illuminate\Http\Request;
 
 class LikeController extends Controller
 {
-    public function togglePostLike(Post $post)
+    public function togglePostLike(Request $request, Post $post)
     {
-        $like = $post->likes()->where('user_id', auth()->id())->first();
+        try {
+            $like = $post->likes()->where('user_id', auth()->id())->first();
+            $isLiked = false;
 
-        if ($like) {
-            $like->delete();
-            $post->decrement('likes_count');
-            $message = 'Like retiré';
-        } else {
-            $post->likes()->create([
-                'user_id' => auth()->id()
+            if ($like) {
+                $like->delete();
+                $post->decrement('likes_count');
+            } else {
+                $post->likes()->create([
+                    'user_id' => auth()->id()
+                ]);
+                $post->increment('likes_count');
+                $isLiked = true;
+            }
+
+            // Rafraîchir le nombre de likes depuis la base de données
+            $post->refresh();
+
+            return response()->json([
+                'success' => true,
+                'likes_count' => $post->likes_count,
+                'isLiked' => $isLiked,
+                'message' => $isLiked ? 'Post liké' : 'Like retiré'
             ]);
-            $post->increment('likes_count');
-            $message = 'Post liké';
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Une erreur est survenue',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        return back()->with('success', $message);
     }
 } 

@@ -41,4 +41,13 @@ class Post extends Model
     {
         return $this->morphMany(Like::class, 'likeable');
     }
+
+    public function isLikedByUser(?User $user): bool
+    {
+        if (!$user) {
+            return false;
+        }
+        
+        return $this->likes()->where('user_id', $user->id)->exists();
+    }
 } 

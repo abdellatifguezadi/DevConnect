@@ -5,39 +5,42 @@ namespace App\Http\Controllers;
 use App\Models\Post;
 use App\Models\User;
 use App\Models\Comment;
+use App\Models\Hashtag;
 use Illuminate\Http\Request;
-
 
 class PostController extends Controller
 {
-    
-
     public function index()
     {
-        
-        $user = auth()->user()->load('profile', 'skills');
-        
-        
-        $connectionsCount = \App\Models\Connection::where(function($query) {
-            $query->where('requester_id', auth()->id())
-                  ->orWhere('requested_id', auth()->id());
-        })->where('status', 'accepted')->count();
-        
-        
+        $user = auth()->user();
         $postsCount = $user->posts()->count();
-        
-       
-        $trendingTags = \App\Models\Hashtag::orderBy('posts_count', 'desc')
-            ->take(5)
-            ->get();
-        
-        
-        $posts = auth()->user()->connectedUsersPosts()
-            ->with(['user.profile', 'comments.user', 'hashtags'])
-            ->latest()
-            ->paginate(10);
+        $connectionsCount = $user->connections()->count();
 
-        return view('dashboard', compact('posts', 'user', 'connectionsCount', 'postsCount', 'trendingTags'));
+        $posts = Post::with(['user.profile', 'comments.user.profile', 'comments.replies.user.profile', 'hashtags'])
+                     ->withCount(['comments', 'likes'])
+                     ->latest()
+                     ->paginate(10);
+
+        $trendingTags = Hashtag::selectRaw('hashtags.*, (SELECT COUNT(*) FROM hashtag_post JOIN posts ON posts.id = hashtag_post.post_id WHERE hashtag_post.hashtag_id = hashtags.id AND posts.deleted_at IS NULL) as hashtag_posts_count')
+                        ->whereExists(function($query) {
+                            $query->from('posts')
+                                 ->join('hashtag_post', 'posts.id', '=', 'hashtag_post.post_id')
+                                 ->whereRaw('hashtags.id = hashtag_post.hashtag_id')
+                                 ->whereNull('posts.deleted_at');
+                        })
+                        ->orderBy('hashtag_posts_count', 'desc')
+                        ->take(5)
+                        ->get();
+
+        return view('dashboard', compact('posts', 'trendingTags', 'user', 'postsCount', 'connectionsCount'));
+    }
+
+    public function show(Post $post)
+    {
+        $post->load(['user.profile', 'comments.user.profile', 'comments.replies.user.profile', 'hashtags'])
+             ->loadCount(['comments', 'likes']);
+
+        return view('posts.show', compact('post'));
     }
 
     public function store(Request $request)

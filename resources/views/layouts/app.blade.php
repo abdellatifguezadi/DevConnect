@@ -32,5 +32,10 @@
                 {{ $slot }}
             </main>
         </div>
+
+        <!-- Ajout de l'attribut defer et vérification que le fichier existe -->
+        @if(file_exists(public_path('js/social-interactions.js')))
+            <script src="{{ asset('js/social-interactions.js') }}" defer></script>
+        @endif
     </body>
 </html>
