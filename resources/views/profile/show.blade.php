@@ -129,10 +129,44 @@
 
                             <div class="mt-4">
                                 <p class="text-gray-800">{{ $post->content }}</p>
-                                @if($post->image)
-                                <img src="{{ asset($post->image) }}"
-                                    alt="Post image"
-                                    class="mt-4 rounded-lg w-full object-cover max-h-96">
+                                @if($post->media)
+                                    @if(isset($post->media['images']))
+                                    <div class="mt-4">
+                                        @foreach($post->media['images'] as $image)
+                                        <img src="{{ $image }}" alt="Post image" class="rounded-lg max-h-96 w-auto">
+                                        @endforeach
+                                    </div>
+                                    @endif
+
+                                    @if(isset($post->media['videos']))
+                                    <div class="mt-4">
+                                        @foreach($post->media['videos'] as $video)
+                                        <video controls class="rounded-lg max-h-96 w-full">
+                                            <source src="{{ $video }}" type="video/mp4">
+                                            Votre navigateur ne supporte pas la lecture de vidéos.
+                                        </video>
+                                        @endforeach
+                                    </div>
+                                    @endif
+                                @endif
+
+                                @if($post->code_snippet)
+                                <div class="mt-4 bg-gray-900 rounded-lg p-4 font-mono text-sm text-gray-200">
+                                    @if($post->programming_language)
+                                    <div class="text-xs text-gray-400 mb-2">{{ strtoupper($post->programming_language) }}</div>
+                                    @endif
+                                    <pre><code>{{ $post->code_snippet }}</code></pre>
+                                </div>
+                                @endif
+
+                                @if($post->hashtags->count() > 0)
+                                <div class="mt-4 flex flex-wrap gap-2">
+                                    @foreach($post->hashtags as $hashtag)
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                                        #{{ $hashtag->name }}
+                                    </span>
+                                    @endforeach
+                                </div>
                                 @endif
                             </div>
 
