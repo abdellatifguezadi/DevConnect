@@ -554,6 +554,19 @@
             </div>
         </div>
     </div>
+    <div id="editPostModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto z-50">
+        <div class="relative min-h-screen flex items-center justify-center p-4">
+            <div class="relative bg-white w-full max-w-md rounded-2xl shadow-xl p-8">
+                <h3 class="text-2xl font-bold text-gray-900 mb-6">Modifier la publication</h3>
+                <button onclick="closeEditPost()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 transition-colors">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+                <x-edit-post-form />
+            </div>
+        </div>
+    </div>
 </x-app-layout>
 
 @if(session('success'))
