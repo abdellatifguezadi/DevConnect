@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\User;
+use App\Models\Skill;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 
@@ -37,7 +36,10 @@ class ProfileController extends Controller
 
         $postsCount = $user->posts()->count();
 
-        return view('profile.show', compact('user', 'posts', 'connectionsCount', 'postsCount'));
+        // Récupérer les compétences de l'utilisateur avec les années d'expérience
+        $userSkills = $user->skills()->withPivot('years_experience')->get();
+
+        return view('profile.show', compact('user', 'posts', 'connectionsCount', 'postsCount', 'userSkills'));
     }
 
     /**
@@ -54,19 +56,25 @@ class ProfileController extends Controller
             'location' => 'nullable|string|max:255',
             'avatar' => 'nullable|image|max:2048',
             'cover_image' => 'nullable|image|max:2048',
+            'skills' => 'nullable|array',
+            'skills.*' => 'exists:skills,id',
         ]);
 
         $user = auth()->user();
         $profile = $user->profile ?? $user->profile()->create();
 
-        if ($request->hasFile('avatar')) {
-            $path = $request->file('avatar')->store('avatars', 'public');
-            $profile->avatar = '/storage/' . $path;
+        $avatarPath = $request->hasFile('avatar') ?
+            $request->file('avatar')->store('avatars', 'public') : null;
+
+        $coverPath = $request->hasFile('cover_image') ?
+            $request->file('cover_image')->store('covers', 'public') : null;
+
+        if ($avatarPath) {
+            $profile->avatar = asset('storage/' . $avatarPath);
         }
 
-        if ($request->hasFile('cover_image')) {
-            $path = $request->file('cover_image')->store('covers', 'public');
-            $profile->cover_image = '/storage/' . $path;
+        if ($coverPath) {
+            $profile->cover_image = asset('storage/' . $coverPath);
         }
 
         $profile->fill($request->only([
@@ -77,6 +85,13 @@ class ProfileController extends Controller
             'website_url',
             'location'
         ]))->save();
+
+        // Mise à jour des compétences
+        if ($request->has('skills')) {
+            $user->skills()->sync($request->skills);
+        } else {
+            $user->skills()->detach(); // Supprime toutes les compétences si aucune n'est sélectionnée
+        }
 
         return back()->with('success', 'Profil mis à jour avec succès');
     }
