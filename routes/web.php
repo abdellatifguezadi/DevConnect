@@ -38,6 +38,12 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/comments/{comment}', [CommentController::class, 'update'])->name('comments.update');
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
     Route::post('/comments/{comment}/reply', [CommentController::class, 'reply'])->name('comments.reply');
+
+    // Routes pour les réponses aux commentaires
+    Route::put('/comments/{comment}/replies/{reply}', [CommentController::class, 'updateReply'])
+        ->name('comments.replies.update');
+    Route::delete('/comments/{comment}/replies/{reply}', [CommentController::class, 'destroyReply'])
+        ->name('comments.replies.destroy');
 });
 
 require __DIR__ . '/auth.php';

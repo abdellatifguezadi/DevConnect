@@ -68,4 +68,43 @@ class CommentController extends Controller
 
         return back()->with('success', 'Réponse ajoutée avec succès');
     }
-} 
+
+    public function updateReply(Request $request, Comment $comment, Comment $reply)
+    {
+        // Vérifier si l'utilisateur est autorisé à modifier cette réponse
+        if ($reply->user_id !== auth()->id()) {
+            return back()->with('error', 'Non autorisé');
+        }
+
+        // Vérifier si la réponse appartient bien au commentaire parent
+        if ($reply->parent_id !== $comment->id) {
+            return back()->with('error', 'Réponse invalide');
+        }
+
+        $request->validate([
+            'content' => 'required|max:1000',
+        ]);
+
+        $reply->update([
+            'content' => $request->content
+        ]);
+
+        return back()->with('success', 'Réponse modifiée avec succès');
+    }
+
+    public function destroyReply(Comment $comment, Comment $reply)
+    {
+        // Vérifier si l'utilisateur est autorisé à supprimer cette réponse
+        if ($reply->user_id !== auth()->id()) {
+            return back()->with('error', 'Non autorisé');
+        }
+
+        // Vérifier si la réponse appartient bien au commentaire parent
+        if ($reply->parent_id !== $comment->id) {
+            return back()->with('error', 'Réponse invalide');
+        }
+
+        $reply->delete();
+        return back()->with('success', 'Réponse supprimée avec succès');
+    }
+}
