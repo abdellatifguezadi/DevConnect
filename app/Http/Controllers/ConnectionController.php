@@ -5,32 +5,43 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Connection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ConnectionController extends Controller
 {
     public function sendRequest(User $user)
     {
-        // Vérifier si une connexion existe déjà
-        $existingConnection = Connection::where(function($query) use ($user) {
-            $query->where('requester_id', auth()->id())
-                  ->where('requested_id', $user->id);
-        })->orWhere(function($query) use ($user) {
-            $query->where('requester_id', $user->id)
-                  ->where('requested_id', auth()->id());
-        })->first();
+        try {
+            // Vérifier si l'utilisateur essaie de se connecter à lui-même
+            if (auth()->id() === $user->id) {
+                return back()->with('error', 'Vous ne pouvez pas vous connecter à vous-même.');
+            }
 
-        if ($existingConnection) {
-            return back()->with('error', 'Une demande de connexion existe déjà avec cet utilisateur.');
+            // Vérifier si une connexion existe déjà
+            $existingConnection = Connection::where(function ($query) use ($user) {
+                $query->where('requester_id', auth()->id())
+                    ->where('requested_id', $user->id);
+            })->orWhere(function ($query) use ($user) {
+                $query->where('requester_id', $user->id)
+                    ->where('requested_id', auth()->id());
+            })->first();
+
+            if ($existingConnection) {
+                return back()->with('error', 'Une connexion ou demande existe déjà avec cet utilisateur.');
+            }
+
+            // Créer la demande de connexion
+            Connection::create([
+                'requester_id' => auth()->id(),
+                'requested_id' => $user->id,
+                'status' => 'pending'
+            ]);
+
+            return back()->with('success', 'Demande de connexion envoyée avec succès.');
+        } catch (\Exception $e) {
+            Log::error('Erreur lors de l\'envoi de la demande de connexion: ' . $e->getMessage());
+            return back()->with('error', 'Une erreur est survenue lors de l\'envoi de la demande.');
         }
-
-        // Créer la demande de connexion
-        Connection::create([
-            'requester_id' => auth()->id(),
-            'requested_id' => $user->id,
-            'status' => 'pending'
-        ]);
-
-        return back()->with('success', 'Demande de connexion envoyée avec succès.');
     }
 
     public function acceptRequest(Connection $connection)
@@ -93,19 +104,19 @@ class ConnectionController extends Controller
 
     public function getAllConnections()
     {
-        $connections = Connection::where(function($query) {
+        $connections = Connection::where(function ($query) {
             $query->where('requester_id', auth()->id())
-                  ->orWhere('requested_id', auth()->id());
+                ->orWhere('requested_id', auth()->id());
         })
-        ->where('status', 'accepted')
-        ->with(['requester.profile', 'requested.profile'])
-        ->get()
-        ->map(function($connection) {
-            // Déterminer l'autre utilisateur (pas l'utilisateur authentifié)
-            return $connection->requester_id === auth()->id() 
-                ? $connection->requested 
-                : $connection->requester;
-        });
+            ->where('status', 'accepted')
+            ->with(['requester.profile', 'requested.profile'])
+            ->get()
+            ->map(function ($connection) {
+                // Déterminer l'autre utilisateur (pas l'utilisateur authentifié)
+                return $connection->requester_id === auth()->id()
+                    ? $connection->requested
+                    : $connection->requester;
+            });
 
         return view('connections.index', compact('connections'));
     }

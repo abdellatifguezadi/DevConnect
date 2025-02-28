@@ -43,6 +43,54 @@
                             Modifier le profil
                         </button>
                         @endif
+
+                        @if(auth()->id() !== $user->id)
+                        @php
+                        $connectionStatus = auth()->user()->getConnectionStatus($user);
+                        @endphp
+
+                        @if(!$connectionStatus)
+                        <form action="{{ route('connections.send', $user) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                Se connecter
+                            </button>
+                        </form>
+                        @elseif($connectionStatus->status === 'pending')
+                        @if($connectionStatus->requester_id === auth()->id())
+                        <form action="{{ route('connections.cancel', $connectionStatus) }}" method="POST" class="mt-4">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                                Annuler la demande
+                            </button>
+                        </form>
+                        @else
+                        <div class="flex space-x-2 mt-4">
+                            <form action="{{ route('connections.accept', $connectionStatus) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                                    Accepter
+                                </button>
+                            </form>
+                            <form action="{{ route('connections.reject', $connectionStatus) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                                    Refuser
+                                </button>
+                            </form>
+                        </div>
+                        @endif
+                        @elseif($connectionStatus->status === 'accepted')
+                        <form action="{{ route('connections.remove', $connectionStatus) }}" method="POST" class="mt-4">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                                Retirer la connexion
+                            </button>
+                        </form>
+                        @endif
+                        @endif
                     </div>
 
                     <div class="mt-8 grid grid-cols-2 gap-4 max-w-lg mx-auto">
@@ -116,7 +164,7 @@
                     @forelse($posts as $post)
                     <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
                         <div class="p-6">
-                        
+
                             <div class="flex items-center space-x-4">
                                 <img src="{{ $post->user->profile?->avatar ?? 'https://avatar.iran.liara.run/public/boy' }}"
                                     class="w-12 h-12 rounded-full object-cover"
@@ -130,24 +178,24 @@
                             <div class="mt-4">
                                 <p class="text-gray-800">{{ $post->content }}</p>
                                 @if($post->media)
-                                    @if(isset($post->media['images']))
-                                    <div class="mt-4">
-                                        @foreach($post->media['images'] as $image)
-                                        <img src="{{ $image }}" alt="Post image" class="rounded-lg max-h-96 w-auto">
-                                        @endforeach
-                                    </div>
-                                    @endif
+                                @if(isset($post->media['images']))
+                                <div class="mt-4">
+                                    @foreach($post->media['images'] as $image)
+                                    <img src="{{ $image }}" alt="Post image" class="rounded-lg max-h-96 w-auto">
+                                    @endforeach
+                                </div>
+                                @endif
 
-                                    @if(isset($post->media['videos']))
-                                    <div class="mt-4">
-                                        @foreach($post->media['videos'] as $video)
-                                        <video controls class="rounded-lg max-h-96 w-full">
-                                            <source src="{{ $video }}" type="video/mp4">
-                                            Votre navigateur ne supporte pas la lecture de vidéos.
-                                        </video>
-                                        @endforeach
-                                    </div>
-                                    @endif
+                                @if(isset($post->media['videos']))
+                                <div class="mt-4">
+                                    @foreach($post->media['videos'] as $video)
+                                    <video controls class="rounded-lg max-h-96 w-full">
+                                        <source src="{{ $video }}" type="video/mp4">
+                                        Votre navigateur ne supporte pas la lecture de vidéos.
+                                    </video>
+                                    @endforeach
+                                </div>
+                                @endif
                                 @endif
 
                                 @if($post->code_snippet)
@@ -198,7 +246,7 @@
                             <div id="comments-{{ $post->id }}" class="mt-4 hidden">
                                 <div class="comments-list">
                                     @foreach($post->comments as $comment)
-                                        <x-comment :comment="$comment" />
+                                    <x-comment :comment="$comment" />
                                     @endforeach
                                 </div>
 
@@ -305,7 +353,7 @@
             form.action = `/posts/${postId}`;
 
             textarea.value = content;
-            
+
             modal.classList.remove('hidden');
         }
 

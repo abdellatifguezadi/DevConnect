@@ -18,6 +18,15 @@ class Comment extends Model
 
     protected $with = ['user'];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::addGlobalScope('order', function ($builder) {
+            $builder->latest();
+        });
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -32,4 +41,4 @@ class Comment extends Model
     {
         return $this->morphMany(Like::class, 'likeable');
     }
-} 
+}

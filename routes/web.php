@@ -43,6 +43,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/connections', [ConnectionController::class, 'getAllConnections'])->name('connections.index');
     Route::get('/connections/pending', [ConnectionController::class, 'getPendingRequests'])->name('connections.pending');
     Route::post('/connections/{user}', [ConnectionController::class, 'sendRequest'])->name('connections.send');
+    Route::post('/connections', [ConnectionController::class, 'store'])->name('connections.store'); // Ajout de cette ligne
     Route::post('/connections/{connection}/accept', [ConnectionController::class, 'acceptRequest'])->name('connections.accept');
     Route::delete('/connections/{connection}/reject', [ConnectionController::class, 'rejectRequest'])->name('connections.reject');
     Route::delete('/connections/{connection}/cancel', [ConnectionController::class, 'cancelRequest'])->name('connections.cancel');
