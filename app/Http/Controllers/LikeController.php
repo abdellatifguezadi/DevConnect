@@ -24,7 +24,6 @@ class LikeController extends Controller
                 $isLiked = true;
             }
 
-            // Rafraîchir le nombre de likes depuis la base de données
             $post->refresh();
 
             return response()->json([

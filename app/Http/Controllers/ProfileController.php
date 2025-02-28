@@ -12,9 +12,7 @@ use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
-    /**
-     * Display the user's profile form.
-     */
+
     public function edit(Request $request): View
     {
         return view('profile.edit', [
@@ -36,15 +34,12 @@ class ProfileController extends Controller
 
         $postsCount = $user->posts()->count();
 
-        // Récupérer les compétences de l'utilisateur avec les années d'expérience
         $userSkills = $user->skills()->withPivot('years_experience')->get();
 
         return view('profile.show', compact('user', 'posts', 'connectionsCount', 'postsCount', 'userSkills'));
     }
 
-    /**
-     * Update the user's profile information.
-     */
+
     public function updateProfile(Request $request): RedirectResponse
     {
         $request->validate([

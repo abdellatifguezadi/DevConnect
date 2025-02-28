@@ -10,21 +10,29 @@ use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
         $postsCount = $user->posts()->count();
         $connectionsCount = $user->connections()->count();
 
         $posts = Post::with(['user.profile', 'comments.user.profile', 'hashtags'])
-                     ->withCount(['comments', 'likes'])
-                     ->latest()
-                     ->paginate(10);
+            ->withCount(['comments', 'likes'])
+            ->latest()
+            ->paginate(10); 
+
+        if ($request->ajax()) {
+            $view = view('components.posts', compact('posts'))->render();
+            return response()->json([
+                'html' => $view,
+                'hasMorePages' => $posts->hasMorePages()
+            ]);
+        }
 
         $trendingTags = Hashtag::where('posts_count', '>', 0)
-                              ->orderBy('posts_count', 'desc')
-                              ->take(5)
-                              ->get();
+            ->orderBy('posts_count', 'desc')
+            ->take(5)
+            ->get();
 
         return view('dashboard', compact('posts', 'trendingTags', 'user', 'postsCount', 'connectionsCount'));
     }
@@ -32,7 +40,7 @@ class PostController extends Controller
     public function show(Post $post)
     {
         $post->load(['user.profile', 'comments.user.profile', 'hashtags'])
-             ->loadCount(['comments', 'likes']);
+            ->loadCount(['comments', 'likes']);
 
         $user = $post->user;
         $postsCount = $user->posts()->count();
@@ -48,8 +56,8 @@ class PostController extends Controller
             'content' => 'required|max:5000',
             'code_snippet' => 'nullable|string',
             'programming_language' => 'nullable|string',
-            'image' => 'nullable|image|max:5120',
-            'video' => 'nullable|mimes:mp4,mov,avi|max:102400',
+            'images.*' => 'nullable|image|max:5120', 
+            'videos.*' => 'nullable|mimes:mp4,mov,avi|max:102400', 
         ]);
 
         $post = auth()->user()->posts()->create([
@@ -62,14 +70,22 @@ class PostController extends Controller
 
         $media = [];
 
-        if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('posts/images', 'public');
-            $media['images'] = [asset('storage/' . $path)];
+   
+        if ($request->hasFile('images')) {
+            $media['images'] = [];
+            foreach ($request->file('images') as $image) {
+                $path = $image->store('posts/images', 'public');
+                $media['images'][] = asset('storage/' . $path);
+            }
         }
 
-        if ($request->hasFile('video')) {
-            $path = $request->file('video')->store('posts/videos', 'public');
-            $media['videos'] = [asset('storage/' . $path)];
+  
+        if ($request->hasFile('videos')) {
+            $media['videos'] = [];
+            foreach ($request->file('videos') as $video) {
+                $path = $video->store('posts/videos', 'public');
+                $media['videos'][] = asset('storage/' . $path);
+            }
         }
 
         if (!empty($media)) {
@@ -90,8 +106,8 @@ class PostController extends Controller
             'content' => 'required|max:5000',
             'code_snippet' => 'nullable|string',
             'programming_language' => 'nullable|string',
-            'image' => 'nullable|image|max:5120', 
-            'video' => 'nullable|mimes:mp4,mov,avi|max:102400', 
+            'image' => 'nullable|image|max:5120',
+            'video' => 'nullable|mimes:mp4,mov,avi|max:102400',
         ]);
 
         $oldHashtags = $post->hashtags;
@@ -105,7 +121,7 @@ class PostController extends Controller
 
         $media = $post->media ?? [];
 
-        $imagePath = $request->file('image') 
+        $imagePath = $request->file('image')
             ? $request->file('image')->store('posts/images', 'public')
             : (isset($media['images'][0]) ? str_replace('storage/', '', $media['images'][0]) : null);
 
@@ -136,11 +152,11 @@ class PostController extends Controller
     private function handleHashtags(Post $post)
     {
         preg_match_all('/#(\w+)/', $post->content, $matches);
-        
+
         if (!empty($matches[1])) {
             foreach ($matches[1] as $tag) {
                 $hashtag = Hashtag::firstOrCreate(['name' => strtolower($tag)]);
-                
+
                 if (!$post->hashtags()->where('hashtag_id', $hashtag->id)->exists()) {
                     $post->hashtags()->attach($hashtag->id);
                     $hashtag->increment('posts_count');
@@ -254,4 +270,4 @@ class PostController extends Controller
 
         return back()->with('success', $message);
     }
-} 
+}
