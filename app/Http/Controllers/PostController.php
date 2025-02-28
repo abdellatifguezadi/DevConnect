@@ -21,16 +21,10 @@ class PostController extends Controller
                      ->latest()
                      ->paginate(10);
 
-        $trendingTags = Hashtag::selectRaw('hashtags.*, (SELECT COUNT(*) FROM hashtag_post JOIN posts ON posts.id = hashtag_post.post_id WHERE hashtag_post.hashtag_id = hashtags.id AND posts.deleted_at IS NULL) as hashtag_posts_count')
-                        ->whereExists(function($query) {
-                            $query->from('posts')
-                                 ->join('hashtag_post', 'posts.id', '=', 'hashtag_post.post_id')
-                                 ->whereRaw('hashtags.id = hashtag_post.hashtag_id')
-                                 ->whereNull('posts.deleted_at');
-                        })
-                        ->orderBy('hashtag_posts_count', 'desc')
-                        ->take(5)
-                        ->get();
+        $trendingTags = Hashtag::where('posts_count', '>', 0)
+                              ->orderBy('posts_count', 'desc')
+                              ->take(5)
+                              ->get();
 
         return view('dashboard', compact('posts', 'trendingTags', 'user', 'postsCount', 'connectionsCount'));
     }
@@ -63,6 +57,8 @@ class PostController extends Controller
             'code_snippet' => $request->code_snippet,
             'programming_language' => $request->programming_language,
         ]);
+
+        $this->handleHashtags($post);
 
         $media = [];
 
@@ -98,36 +94,59 @@ class PostController extends Controller
             'video' => 'nullable|mimes:mp4,mov,avi|max:102400', 
         ]);
 
-        $post->update($request->only(['content', 'code_snippet', 'programming_language']));
+        $oldHashtags = $post->hashtags;
+        foreach ($oldHashtags as $hashtag) {
+            $hashtag->decrement('posts_count');
+            if ($hashtag->posts_count <= 0) {
+                $hashtag->delete();
+            }
+        }
+        $post->hashtags()->detach();
 
         $media = $post->media ?? [];
 
-        if ($request->hasFile('image')) {
-            if (isset($media['images']) && !empty($media['images'])) {
-                foreach ($media['images'] as $image) {
-                    \Storage::disk('public')->delete(str_replace('storage/', '', $image));
-                }
-            }
-            $path = $request->file('image')->store('posts/images', 'public');
-            $media['images'] = [asset('storage/' . $path)];
+        $imagePath = $request->file('image') 
+            ? $request->file('image')->store('posts/images', 'public')
+            : (isset($media['images'][0]) ? str_replace('storage/', '', $media['images'][0]) : null);
+
+        if ($imagePath) {
+            $media['images'] = ['/storage/' . $imagePath];
         }
 
-        if ($request->hasFile('video')) {
-            if (isset($media['videos']) && !empty($media['videos'])) {
-                foreach ($media['videos'] as $video) {
-                    \Storage::disk('public')->delete(str_replace('storage/', '', $video));
-                }
-            }
-            $path = $request->file('video')->store('posts/videos', 'public');
-            $media['videos'] = [asset('storage/' . $path)];
+        $videoPath = $request->file('video')
+            ? $request->file('video')->store('posts/videos', 'public')
+            : (isset($media['videos'][0]) ? str_replace('storage/', '', $media['videos'][0]) : null);
+
+        if ($videoPath) {
+            $media['videos'] = ['/storage/' . $videoPath];
         }
 
-        if (!empty($media)) {
-            $post->media = $media;
-            $post->save();
-        }
+        $post->update([
+            'content' => $request->content,
+            'code_snippet' => $request->code_snippet,
+            'programming_language' => $request->programming_language,
+            'media' => $media
+        ]);
+
+        $this->handleHashtags($post);
 
         return back()->with('success', 'Post mis à jour avec succès');
+    }
+
+    private function handleHashtags(Post $post)
+    {
+        preg_match_all('/#(\w+)/', $post->content, $matches);
+        
+        if (!empty($matches[1])) {
+            foreach ($matches[1] as $tag) {
+                $hashtag = Hashtag::firstOrCreate(['name' => strtolower($tag)]);
+                
+                if (!$post->hashtags()->where('hashtag_id', $hashtag->id)->exists()) {
+                    $post->hashtags()->attach($hashtag->id);
+                    $hashtag->increment('posts_count');
+                }
+            }
+        }
     }
 
     public function destroy(Post $post)

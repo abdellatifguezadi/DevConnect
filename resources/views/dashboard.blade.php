@@ -74,7 +74,7 @@
                                             @foreach($trendingTags as $tag)
                                             <a href="#" class="flex items-center justify-between hover:bg-gray-50 p-2 rounded">
                                                 <span class="text-gray-600">#{{ $tag->name }}</span>
-                                                <span class="text-gray-400 text-sm">{{ number_format($tag->hashtag_posts_count) }}</span>
+                                                <span class="text-gray-400 text-sm">{{ number_format($tag->posts_count) }}</span>
                                             </a>
                                             @endforeach
                                         </div>
