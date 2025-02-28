@@ -16,7 +16,7 @@ class PostController extends Controller
         $postsCount = $user->posts()->count();
         $connectionsCount = $user->connections()->count();
 
-        $posts = Post::with(['user.profile', 'comments.user.profile', 'comments.replies.user.profile', 'hashtags'])
+        $posts = Post::with(['user.profile', 'comments.user.profile', 'hashtags'])
                      ->withCount(['comments', 'likes'])
                      ->latest()
                      ->paginate(10);
@@ -37,10 +37,15 @@ class PostController extends Controller
 
     public function show(Post $post)
     {
-        $post->load(['user.profile', 'comments.user.profile', 'comments.replies.user.profile', 'hashtags'])
+        $post->load(['user.profile', 'comments.user.profile', 'hashtags'])
              ->loadCount(['comments', 'likes']);
 
-        return view('posts.show', compact('post'));
+        $user = $post->user;
+        $postsCount = $user->posts()->count();
+        $connectionsCount = $user->connections()->count();
+        $posts = collect([$post]);
+
+        return view('profile.show', compact('user', 'posts', 'postsCount', 'connectionsCount'));
     }
 
     public function store(Request $request)
@@ -141,18 +146,26 @@ class PostController extends Controller
             'content' => 'required|max:1000',
         ]);
 
-        $post->comments()->create([
+        $comment = $post->comments()->create([
             'user_id' => auth()->id(),
             'content' => $request->content,
         ]);
 
-        return back()->with('success', 'Commentaire ajouté avec succès');
+        $comment->load('user.profile');
+
+        $html = view('components.comment', ['comment' => $comment])->render();
+
+        return response()->json([
+            'success' => true,
+            'comment' => $comment,
+            'html' => $html
+        ]);
     }
 
     public function updateComment(Request $request, Comment $comment)
     {
         if ($comment->user_id !== auth()->id()) {
-            return back()->with('error', 'Non autorisé');
+            return response()->json(['success' => false, 'message' => 'Non autorisé'], 403);
         }
 
         $request->validate([
@@ -160,36 +173,29 @@ class PostController extends Controller
         ]);
 
         $comment->update(['content' => $request->content]);
+        $comment->load('user.profile');
 
-        return back()->with('success', 'Commentaire mis à jour avec succès');
+        $html = view('components.comment', ['comment' => $comment])->render();
+
+        return response()->json([
+            'success' => true,
+            'comment' => $comment,
+            'html' => $html
+        ]);
     }
 
     public function deleteComment(Comment $comment)
     {
         if ($comment->user_id !== auth()->id()) {
-            return back()->with('error', 'Non autorisé');
+            return response()->json(['success' => false, 'message' => 'Non autorisé'], 403);
         }
 
         $comment->delete();
-        return back()->with('success', 'Commentaire supprimé avec succès');
-    }
 
-    public function replyToComment(Request $request, Comment $comment)
-    {
-        $request->validate([
-            'content' => 'required|max:1000',
+        return response()->json([
+            'success' => true,
+            'message' => 'Commentaire supprimé avec succès'
         ]);
-
-        $reply = new Comment([
-            'user_id' => auth()->id(),
-            'post_id' => $comment->post_id,
-            'parent_id' => $comment->id,
-            'content' => $request->content,
-        ]);
-
-        $reply->save();
-
-        return back()->with('success', 'Réponse ajoutée avec succès');
     }
 
     public function toggleLike(Post $post)

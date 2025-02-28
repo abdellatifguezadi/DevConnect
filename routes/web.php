@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\ConnectionController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -37,13 +38,15 @@ Route::middleware(['auth'])->group(function () {
     // Routes des commentaires
     Route::put('/comments/{comment}', [CommentController::class, 'update'])->name('comments.update');
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
-    Route::post('/comments/{comment}/reply', [CommentController::class, 'reply'])->name('comments.reply');
 
-    // Routes pour les réponses aux commentaires
-    Route::put('/comments/{comment}/replies/{reply}', [CommentController::class, 'updateReply'])
-        ->name('comments.replies.update');
-    Route::delete('/comments/{comment}/replies/{reply}', [CommentController::class, 'destroyReply'])
-        ->name('comments.replies.destroy');
+    // Routes des connexions
+    Route::get('/connections', [ConnectionController::class, 'getAllConnections'])->name('connections.index');
+    Route::get('/connections/pending', [ConnectionController::class, 'getPendingRequests'])->name('connections.pending');
+    Route::post('/connections/{user}', [ConnectionController::class, 'sendRequest'])->name('connections.send');
+    Route::post('/connections/{connection}/accept', [ConnectionController::class, 'acceptRequest'])->name('connections.accept');
+    Route::delete('/connections/{connection}/reject', [ConnectionController::class, 'rejectRequest'])->name('connections.reject');
+    Route::delete('/connections/{connection}/cancel', [ConnectionController::class, 'cancelRequest'])->name('connections.cancel');
+    Route::delete('/connections/{connection}', [ConnectionController::class, 'removeConnection'])->name('connections.remove');
 });
 
 require __DIR__ . '/auth.php';

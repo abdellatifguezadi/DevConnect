@@ -34,6 +34,29 @@
                     <span class="absolute -top-1 -right-1 bg-blue-500 rounded-full w-2 h-2"></span>
                 </a>
 
+                <!-- Connexions -->
+                <a href="{{ route('connections.index') }}" class="flex items-center space-x-1 hover:text-blue-400" title="Mes connexions">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                </a>
+
+                <!-- Demandes de connexion -->
+                <a href="{{ route('connections.pending') }}" class="flex items-center space-x-1 hover:text-blue-400 relative" title="Demandes de connexion">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                    </svg>
+                    @php
+                        $pendingConnections = auth()->user()->connections()
+                            ->where('status', 'pending')
+                            ->where('requested_id', auth()->id())
+                            ->count();
+                    @endphp
+                    @if($pendingConnections > 0)
+                        <span class="absolute -top-1 -right-1 bg-red-500 rounded-full w-2 h-2"></span>
+                    @endif
+                </a>
+
                 <!-- Notifications -->
                 <a href="#" class="flex items-center space-x-1 hover:text-blue-400 relative" title="Notifications">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -54,7 +77,9 @@
                 <div class="relative" x-data="{ open: false }">
                     <button @click="open = !open" class="flex items-center space-x-2">
                         <div class="h-8 w-8 rounded-full overflow-hidden">
-                            <img src="https://avatar.iran.liara.run/public/boy" alt="Profile" class="w-full h-full object-cover"/>
+                            <img src="{{ auth()->user()->profile?->avatar ?? 'https://avatar.iran.liara.run/public/boy' }}" 
+                                 alt="Profile" 
+                                 class="w-full h-full object-cover"/>
                         </div>
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
@@ -65,7 +90,7 @@
                     <div x-show="open" 
                          @click.away="open = false"
                          class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 text-gray-700">
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-100">Mon Profil</a>
+                        <a href="{{ route('profile.show', ['user' => auth()->id()]) }}" class="block px-4 py-2 hover:bg-gray-100">Mon Profil</a>
                         
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf

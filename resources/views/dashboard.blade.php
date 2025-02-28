@@ -311,7 +311,7 @@
 
                                                     <div id="comments-{{ $post->id }}" class="mt-4 hidden">
                                                         <div class="comments-list">
-                                                            @foreach($post->comments->whereNull('parent_id') as $comment)
+                                                            @foreach($post->comments as $comment)
                                                                 <x-comment :comment="$comment" />
                                                             @endforeach
                                                         </div>
@@ -450,15 +450,6 @@
 @endif
 
 <script>
-    function toggleReplyInput(commentId) {
-        const replyInput = document.getElementById(`reply-input-${commentId}`);
-        if (replyInput.style.display === "none" || replyInput.style.display === "") {
-            replyInput.style.display = "block";
-        } else {
-            replyInput.style.display = "none";
-        }
-    }
-
     function toggleEditComment(commentId) {
         const editComment = document.getElementById(`edit-comment-${commentId}`);
         if (editComment.style.display === "none" || editComment.style.display === "") {

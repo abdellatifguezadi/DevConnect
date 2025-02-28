@@ -29,7 +29,7 @@ class Post extends Model
 
     public function comments()
     {
-        return $this->hasMany(Comment::class)->with('replies');
+        return $this->hasMany(Comment::class);
     }
 
     public function hashtags()
