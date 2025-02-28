@@ -120,4 +120,10 @@ class ConnectionController extends Controller
 
         return view('connections.index', compact('connections'));
     }
+
+    public function destroy(User $user)
+    {
+        auth()->user()->connections()->detach($user->id);
+        return back()->with('success', 'Connexion supprimée avec succès');
+    }
 }

@@ -48,6 +48,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/connections/{connection}/reject', [ConnectionController::class, 'rejectRequest'])->name('connections.reject');
     Route::delete('/connections/{connection}/cancel', [ConnectionController::class, 'cancelRequest'])->name('connections.cancel');
     Route::delete('/connections/{connection}', [ConnectionController::class, 'removeConnection'])->name('connections.remove');
+    Route::delete('/connections/{user}', [ConnectionController::class, 'destroy'])->name('connections.destroy');
 });
 
 require __DIR__ . '/auth.php';
