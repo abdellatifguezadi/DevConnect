@@ -5,6 +5,7 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ConnectionController;
+use App\Http\Controllers\SearchController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -49,6 +50,9 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/connections/{connection}/cancel', [ConnectionController::class, 'cancelRequest'])->name('connections.cancel');
     Route::delete('/connections/{connection}', [ConnectionController::class, 'removeConnection'])->name('connections.remove');
     Route::delete('/connections/{user}', [ConnectionController::class, 'destroy'])->name('connections.destroy');
+
+    // Recherche d'utilisateurs
+    Route::get('/search/users', [SearchController::class, 'searchUsers'])->name('search.users');
 });
 
 require __DIR__ . '/auth.php';
