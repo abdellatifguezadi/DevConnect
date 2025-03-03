@@ -54,6 +54,7 @@ Route::middleware(['auth'])->group(function () {
     // Recherche d'utilisateurs et hashtags
     Route::get('/search/users', [SearchController::class, 'searchUsers'])->name('search.users');
     Route::get('/hashtags/{hashtag}', [SearchController::class, 'showHashtag'])->name('hashtags.show');
+    Route::get('/languages/{language}', [SearchController::class, 'showLanguage'])->name('languages.show');
 });
 
 require __DIR__ . '/auth.php';

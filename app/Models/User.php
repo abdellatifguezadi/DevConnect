@@ -84,32 +84,32 @@ class User extends Authenticatable
             ->union($this->receivedConnections()->where('status', 'accepted'));
     }
 
-    public function connectedUsers()
-    {
-        // Récupérer les IDs des utilisateurs connectés (dans les deux sens)
-        $connectedIds = Connection::where(function ($query) {
-            $query->where('requester_id', $this->id)
-                ->orWhere('requested_id', $this->id);
-        })
-            ->where('status', 'accepted')
-            ->get()
-            ->map(function ($connection) {
-                return $connection->requester_id === $this->id
-                    ? $connection->requested_id
-                    : $connection->requester_id;
-            });
+    // public function connectedUsers()
+    // {
+       
+    //     $connectedIds = Connection::where(function ($query) {
+    //         $query->where('requester_id', $this->id)
+    //             ->orWhere('requested_id', $this->id);
+    //     })
+    //         ->where('status', 'accepted')
+    //         ->get()
+    //         ->map(function ($connection) {
+    //             return $connection->requester_id === $this->id
+    //                 ? $connection->requested_id
+    //                 : $connection->requester_id;
+    //         });
 
-        // Ajouter l'ID de l'utilisateur actuel
-        $connectedIds[] = $this->id;
 
-        return $connectedIds;
-    }
+    //     $connectedIds[] = $this->id;
 
-    public function connectedUsersPosts()
-    {
-        return Post::whereIn('user_id', $this->connectedUsers())
-            ->latest();
-    }
+    //     return $connectedIds;
+    // }
+
+    // public function connectedUsersPosts()
+    // {
+    //     return Post::whereIn('user_id', $this->connectedUsers())
+    //         ->latest();
+    // }
 
     public function getConnectionStatus(User $otherUser)
     {
@@ -122,15 +122,15 @@ class User extends Authenticatable
         })->first();
     }
 
-    public function isConnectedWith(User $otherUser)
-    {
-        $connection = $this->getConnectionStatus($otherUser);
-        return $connection && $connection->status === 'accepted';
-    }
+    // public function isConnectedWith(User $otherUser)
+    // {
+    //     $connection = $this->getConnectionStatus($otherUser);
+    //     return $connection && $connection->status === 'accepted';
+    // }
 
-    public function hasPendingRequestWith(User $otherUser)
-    {
-        $connection = $this->getConnectionStatus($otherUser);
-        return $connection && $connection->status === 'pending';
-    }
+    // public function hasPendingRequestWith(User $otherUser)
+    // {
+    //     $connection = $this->getConnectionStatus($otherUser);
+    //     return $connection && $connection->status === 'pending';
+    // }
 }

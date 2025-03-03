@@ -145,7 +145,7 @@
                                     </div>
                                     @if(auth()->id() === $post->user_id)
                                     <div class="flex space-x-2">
-                                        <button onclick="openEditPost('{{ $post->id }}', '{{ $post->content }}')"
+                                        <button onclick="openEditPost('{{ $post->id }}', '{{ $post->content }}', '{{ $post->language->name }}', '{{ $post->code_snippet }}')"
                                             class="text-gray-400 hover:text-blue-600 transition-colors">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -360,14 +360,23 @@
             }
         }
 
-        function openEditPost(postId, content) {
+        function openEditPost(postId, content, language, codeSnippet) {
             const modal = document.getElementById('editPostModal');
             const form = document.getElementById('editPostForm');
-            const textarea = document.getElementById('editPostContent');
+            const contentTextarea = document.getElementById('editPostContent');
+            const languageInput = document.getElementById('editPostLanguage');
+            const codeSnippetTextarea = document.getElementById('editPostCodeSnippet');
 
             form.action = `/posts/${postId}`;
+            contentTextarea.value = content;
 
-            textarea.value = content;
+            if (languageInput) {
+                languageInput.value = language || '';
+            }
+
+            if (codeSnippetTextarea && codeSnippet) {
+                codeSnippetTextarea.value = codeSnippet;
+            }
 
             modal.classList.remove('hidden');
         }

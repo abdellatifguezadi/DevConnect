@@ -8,12 +8,9 @@ class Language extends Model
 {
     protected $table = 'languages';
     protected $fillable = ['name'];
-    
-
 
     public function posts()
     {
-        return $this->hasMany(Post::class, 'language_id');
+        return $this->belongsToMany(Post::class);
     }
-
 }

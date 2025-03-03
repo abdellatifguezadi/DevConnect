@@ -142,18 +142,19 @@
                 .then(response => response.json())
                 .then(data => {
   
-                    displaySearchResults(data.users, data.hashtags || []);
+                    displaySearchResults(data.users, data.hashtags || [] , data.languages || []);
                 })
                 .catch(error => console.error('Erreur:', error));
         }
 
-        function displaySearchResults(users, hashtags) {
+        function displaySearchResults(users, hashtags , languages) {
             searchResults.innerHTML = '';
 
             if (!users) users = [];
             if (!hashtags) hashtags = [];
+            if (!languages) languages = [];
 
-            if (users.length === 0 && hashtags.length === 0) {
+            if (users.length === 0 && hashtags.length === 0 && languages.length === 0) {
                 searchResults.innerHTML = '<div class="px-4 py-3 text-gray-500">Aucun résultat trouvé</div>';
                 searchResults.classList.remove('hidden');
                 return;
@@ -186,6 +187,29 @@
                     `;
 
                     resultsList.appendChild(hashtagElement);
+                });
+            }
+
+            if (languages && languages.length > 0) {
+                const languagesSection = document.createElement('div');
+                languagesSection.innerHTML = '<div class="px-4 py-2 bg-gray-100 font-medium text-gray-700">Langages de programmation</div>';
+                resultsList.appendChild(languagesSection);
+
+                languages.forEach(language => {
+                    const languageElement = document.createElement('a');
+                    languageElement.href = language.url;
+                    languageElement.className = 'flex items-center px-4 py-3 hover:bg-gray-100 border-b border-gray-100';
+
+                    languageElement.innerHTML = `
+                        <div class="flex items
+                        -center">
+                            <div>
+                                <div class="font-medium text-gray-900">${language.name}</div>
+                                <div class="text-sm text-gray-500">${language.posts_count} publication${language.posts_count > 1 ? 's' : ''}</div>
+                            </div>
+                        </div>
+                    `;
+                    resultsList.appendChild(languageElement);
                 });
             }
 

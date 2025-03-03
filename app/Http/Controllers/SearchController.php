@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Hashtag;
+use App\Models\Language;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -55,9 +56,28 @@ class SearchController extends Controller
             });
         }
 
+        $languages = [];
+
+        if (class_exists('App\Models\Language')) {
+            $languageResults = Language::where('name', 'like', '%' . $query . '%')
+                ->limit(5)
+                ->get();
+
+            $languages = $languageResults->map(function ($language) {
+                return [
+                    'id' => $language->id,
+                    'name' => $language->name,
+                    'posts_count' => $language->posts_count ?? $language->posts()->count() ?? 0,
+                    'url' => route('languages.show', $language->name)
+                ];
+            });
+        }
+
+
         return response()->json([
             'users' => $users,
-            'hashtags' => $hashtags
+            'hashtags' => $hashtags,
+            'languages' => $languages
         ]);
     }
 
@@ -77,5 +97,18 @@ class SearchController extends Controller
             ->paginate(10);
 
         return view('hashtags.show', compact('tag', 'posts'));
+    }
+
+    public function showLanguage($language)
+    {
+        $lang = Language::where('name', $language)->firstOrFail();
+
+        $posts = $lang->posts()
+            ->with(['user.profile', 'comments.user.profile', 'hashtags'])
+            ->withCount(['comments', 'likes'])
+            ->latest()
+            ->paginate(10);
+
+        return view('languages.show', compact('lang', 'posts'));
     }
 }

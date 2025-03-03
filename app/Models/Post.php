@@ -55,4 +55,9 @@ class Post extends Model
     {
         return $this->belongsTo(Language::class);
     }
+
+    public function languages()
+    {
+        return $this->belongsToMany(Language::class);
+    }
 }

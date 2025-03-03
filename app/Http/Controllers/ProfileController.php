@@ -53,10 +53,15 @@ class ProfileController extends Controller
             'cover_image' => 'nullable|image|max:2048',
             'skills' => 'nullable|array',
             'skills.*' => 'exists:skills,id',
+            'name' => 'required|string|max:255',
         ]);
 
         $user = auth()->user();
         $profile = $user->profile ?? $user->profile()->create();
+
+        $user->update([
+            'name' => $request->name
+        ]);
 
         $avatarPath = $request->hasFile('avatar') ?
             $request->file('avatar')->store('avatars', 'public') : null;
@@ -81,19 +86,16 @@ class ProfileController extends Controller
             'location'
         ]))->save();
 
-        // Mise à jour des compétences
         if ($request->has('skills')) {
             $user->skills()->sync($request->skills);
         } else {
-            $user->skills()->detach(); // Supprime toutes les compétences si aucune n'est sélectionnée
+            $user->skills()->detach(); 
         }
 
         return back()->with('success', 'Profil mis à jour avec succès');
     }
 
-    /**
-     * Delete the user's account.
-     */
+
     public function destroy(Request $request): RedirectResponse
     {
         $request->validateWithBag('userDeletion', [

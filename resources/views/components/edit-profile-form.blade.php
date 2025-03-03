@@ -3,6 +3,11 @@
     @method('PUT')
     <div class="space-y-4">
         <div>
+            <label class="block text-sm font-medium text-gray-700 text-left mb-2">Nom</label>
+            <input type="text" name="name" value="{{ $user->name }}"
+                class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+        </div>
+        <div>
             <label class="block text-sm font-medium text-gray-700 text-left mb-2">Titre professionnel</label>
             <input type="text" name="title" value="{{ $user->profile?->title }}"
                 class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
@@ -65,7 +70,7 @@
                 @endforeach
             </div>
         </div>
-        
+
     </div>
     <div class="flex justify-end space-x-3 mt-8">
         <button type="button" onclick="closeEditProfile()"

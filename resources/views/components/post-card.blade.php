@@ -14,64 +14,65 @@
             </div>
             <div class="flex items-center space-x-3">
                 @if(auth()->id() !== $post->user_id)
-                    @php
-                        $connectionStatus = auth()->user()->getConnectionStatus($post->user);
-                    @endphp
+                @php
+                $connectionStatus = auth()->user()->getConnectionStatus($post->user);
+                @endphp
 
-                    @if(!$connectionStatus)
-                        <form action="{{ route('connections.send', $post->user) }}" method="POST">
-                            @csrf
-                            <button type="submit" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-full hover:shadow-lg transition duration-200">
-                                Se connecter
-                            </button>
-                        </form>
-                    @elseif($connectionStatus->status === 'pending')
-                        @if($connectionStatus->requester_id === auth()->id())
-                            <form action="{{ route('connections.cancel', $connectionStatus) }}" method="POST">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="px-4 py-2 bg-gray-500 text-white rounded-full hover:bg-gray-600 transition duration-200">
-                                    Annuler la demande
-                                </button>
-                            </form>
-                        @else
-                            <div class="flex space-x-2">
-                                <form action="{{ route('connections.accept', $connectionStatus) }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition duration-200">
-                                        Accepter
-                                    </button>
-                                </form>
-                                <form action="{{ route('connections.reject', $connectionStatus) }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition duration-200">
-                                        Refuser
-                                    </button>
-                                </form>
-                            </div>
-                        @endif
-                    @endif
+                @if(!$connectionStatus)
+                <form action="{{ route('connections.send', $post->user) }}" method="POST">
+                    @csrf
+                    <button type="submit" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-full hover:shadow-lg transition duration-200">
+                        Se connecter
+                    </button>
+                </form>
+                @elseif($connectionStatus->status === 'pending')
+                @if($connectionStatus->requester_id === auth()->id())
+                <form action="{{ route('connections.cancel', $connectionStatus) }}" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="px-4 py-2 bg-gray-500 text-white rounded-full hover:bg-gray-600 transition duration-200">
+                        Annuler la demande
+                    </button>
+                </form>
+                @else
+                <div class="flex space-x-2">
+                    <form action="{{ route('connections.accept', $connectionStatus) }}" method="POST">
+                        @csrf
+                        <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition duration-200">
+                            Accepter
+                        </button>
+                    </form>
+                    <form action="{{ route('connections.reject', $connectionStatus) }}" method="POST">
+                        @csrf
+                        <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition duration-200">
+                            Refuser
+                        </button>
+                    </form>
+                </div>
+                @endif
+                @endif
                 @endif
                 @if($post->user_id === auth()->id())
-                    <div class="relative" x-data="{ open: false }">
-                        <button @click="open = !open" class="text-gray-400 hover:text-gray-600">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                            </svg>
+                <div class="relative" x-data="{ open: false }">
+                    <button @click="open = !open" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                        </svg>
+                    </button>
+                    <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
+                        <button onclick="openEditPost('{{ $post->id }}', '{{ $post->content }}', '{{ $post->language->name }}', '{{ $post->code_snippet }}')"
+                            class="block w-full text-left px-4 py-2 text-blue-600 hover:bg-gray-100">
+                            Modifier
                         </button>
-                        <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
-                            <button @click="$dispatch('open-modal', 'edit-post-{{ $post->id }}')" class="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100">
-                                Modifier
+                        <form action="{{ route('posts.destroy', $post) }}" method="POST">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100">
+                                Supprimer
                             </button>
-                            <form action="{{ route('posts.destroy', $post) }}" method="POST">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100">
-                                    Supprimer
-                                </button>
-                            </form>
-                        </div>
+                        </form>
                     </div>
+                </div>
                 @endif
             </div>
         </div>
@@ -81,43 +82,43 @@
             <p class="text-gray-700">{{ $post->content }}</p>
 
             @if($post->media)
-                @if(isset($post->media['images']))
-                    <div class="mt-4">
-                        @foreach($post->media['images'] as $image)
-                            <img src="{{ $image }}" alt="Post image" class="rounded-lg max-h-96 w-auto">
-                        @endforeach
-                    </div>
-                @endif
+            @if(isset($post->media['images']))
+            <div class="mt-4">
+                @foreach($post->media['images'] as $image)
+                <img src="{{ $image }}" alt="Post image" class="rounded-lg max-h-96 w-auto">
+                @endforeach
+            </div>
+            @endif
 
-                @if(isset($post->media['videos']))
-                    <div class="mt-4">
-                        @foreach($post->media['videos'] as $video)
-                            <video controls class="rounded-lg max-h-96 w-full">
-                                <source src="{{ $video }}" type="video/mp4">
-                                Votre navigateur ne supporte pas la lecture de vidéos.
-                            </video>
-                        @endforeach
-                    </div>
-                @endif
+            @if(isset($post->media['videos']))
+            <div class="mt-4">
+                @foreach($post->media['videos'] as $video)
+                <video controls class="rounded-lg max-h-96 w-full">
+                    <source src="{{ $video }}" type="video/mp4">
+                    Votre navigateur ne supporte pas la lecture de vidéos.
+                </video>
+                @endforeach
+            </div>
+            @endif
             @endif
 
             @if($post->code_snippet)
-                <div class="mt-4 bg-gray-900 rounded-lg p-4 font-mono text-sm text-gray-200">
-                    @if($post->programming_language)
-                        <div class="text-xs text-gray-400 mb-2">{{ strtoupper($post->programming_language) }}</div>
-                    @endif
-                    <pre><code>{{ $post->code_snippet }}</code></pre>
-                </div>
+            <div class="mt-4 bg-gray-900 rounded-lg p-4 font-mono text-sm text-gray-200">
+                @if($post->programming_language)
+                <div class="text-xs text-gray-400 mb-2">{{ strtoupper($post->programming_language) }}</div>
+                @endif
+                <pre><code>{{ $post->code_snippet }}</code></pre>
+            </div>
             @endif
 
             @if($post->hashtags->count() > 0)
-                <div class="mt-4 flex flex-wrap gap-2">
-                    @foreach($post->hashtags as $hashtag)
-                        <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-                            #{{ $hashtag->name }}
-                        </span>
-                    @endforeach
-                </div>
+            <div class="mt-4 flex flex-wrap gap-2">
+                @foreach($post->hashtags as $hashtag)
+                <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                    #{{ $hashtag->name }}
+                </span>
+                @endforeach
+            </div>
             @endif
         </div>
 
@@ -149,7 +150,7 @@
         <div id="comments-{{ $post->id }}" class="mt-4 hidden">
             <div class="comments-list">
                 @foreach($post->comments as $comment)
-                    <x-comment :comment="$comment" />
+                <x-comment :comment="$comment" />
                 @endforeach
             </div>
 

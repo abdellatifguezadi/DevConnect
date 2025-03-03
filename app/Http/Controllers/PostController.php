@@ -61,7 +61,6 @@ class PostController extends Controller
             'videos.*' => 'nullable|mimes:mp4,mov,avi|max:102400',
         ]);
 
-        // Find or create the language
         $language = Language::firstOrCreate(['name' => $request->language]);
 
         $post = auth()->user()->posts()->create([
@@ -69,6 +68,8 @@ class PostController extends Controller
             'code_snippet' => $request->code_snippet,
             'language_id' => $language->id,
         ]);
+
+        $post->languages()->attach($language->id);
 
         $this->handleHashtags($post);
 
@@ -109,7 +110,7 @@ class PostController extends Controller
         $request->validate([
             'content' => 'required|max:5000',
             'code_snippet' => 'nullable|string',
-            'language' => 'required|string',
+            'language' => 'nullable|string',
             'image' => 'nullable|image|max:5120',
             'video' => 'nullable|mimes:mp4,mov,avi|max:102400',
         ]);
@@ -125,26 +126,24 @@ class PostController extends Controller
 
         $media = $post->media ?? [];
 
-        $imagePath = $request->file('image')
-            ? $request->file('image')->store('posts/images', 'public')
-            : (isset($media['images'][0]) ? str_replace('storage/', '', $media['images'][0]) : null);
 
-        if ($imagePath) {
-            $media['images'] = ['/storage/' . $imagePath];
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('posts/images', 'public');
+            $media['images'] = [asset('storage/' . $imagePath)];
         }
 
-        $videoPath = $request->file('video')
-            ? $request->file('video')->store('posts/videos', 'public')
-            : (isset($media['videos'][0]) ? str_replace('storage/', '', $media['videos'][0]) : null);
 
-        if ($videoPath) {
-            $media['videos'] = ['/storage/' . $videoPath];
+        if ($request->hasFile('video')) {
+            $videoPath = $request->file('video')->store('posts/videos', 'public');
+            $media['videos'] = [asset('storage/' . $videoPath)];
         }
 
-        // Handle language update
         if ($request->language) {
             $language = Language::firstOrCreate(['name' => $request->language]);
             $post->language_id = $language->id;
+
+            $post->languages()->detach();
+            $post->languages()->attach($language->id);
         }
 
         $post->update([
