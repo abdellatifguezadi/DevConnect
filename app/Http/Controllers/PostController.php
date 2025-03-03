@@ -6,6 +6,7 @@ use App\Models\Post;
 use App\Models\User;
 use App\Models\Comment;
 use App\Models\Hashtag;
+use App\Models\Language;
 use Illuminate\Http\Request;
 
 class PostController extends Controller
@@ -19,7 +20,7 @@ class PostController extends Controller
         $posts = Post::with(['user.profile', 'comments.user.profile', 'hashtags'])
             ->withCount(['comments', 'likes'])
             ->latest()
-            ->paginate(10); 
+            ->paginate(10);
 
         if ($request->ajax()) {
             $view = view('components.posts', compact('posts'))->render();
@@ -55,22 +56,25 @@ class PostController extends Controller
         $request->validate([
             'content' => 'required|max:5000',
             'code_snippet' => 'nullable|string',
-            'programming_language' => 'nullable|string',
-            'images.*' => 'nullable|image|max:5120', 
-            'videos.*' => 'nullable|mimes:mp4,mov,avi|max:102400', 
+            'language' => 'required|string',
+            'images.*' => 'nullable|image|max:5120',
+            'videos.*' => 'nullable|mimes:mp4,mov,avi|max:102400',
         ]);
+
+        // Find or create the language
+        $language = Language::firstOrCreate(['name' => $request->language]);
 
         $post = auth()->user()->posts()->create([
             'content' => $request->content,
             'code_snippet' => $request->code_snippet,
-            'programming_language' => $request->programming_language,
+            'language_id' => $language->id,
         ]);
 
         $this->handleHashtags($post);
 
         $media = [];
 
-   
+
         if ($request->hasFile('images')) {
             $media['images'] = [];
             foreach ($request->file('images') as $image) {
@@ -79,7 +83,7 @@ class PostController extends Controller
             }
         }
 
-  
+
         if ($request->hasFile('videos')) {
             $media['videos'] = [];
             foreach ($request->file('videos') as $video) {
@@ -105,7 +109,7 @@ class PostController extends Controller
         $request->validate([
             'content' => 'required|max:5000',
             'code_snippet' => 'nullable|string',
-            'programming_language' => 'nullable|string',
+            'language' => 'required|string',
             'image' => 'nullable|image|max:5120',
             'video' => 'nullable|mimes:mp4,mov,avi|max:102400',
         ]);
@@ -137,10 +141,15 @@ class PostController extends Controller
             $media['videos'] = ['/storage/' . $videoPath];
         }
 
+        // Handle language update
+        if ($request->language) {
+            $language = Language::firstOrCreate(['name' => $request->language]);
+            $post->language_id = $language->id;
+        }
+
         $post->update([
             'content' => $request->content,
             'code_snippet' => $request->code_snippet,
-            'programming_language' => $request->programming_language,
             'media' => $media
         ]);
 

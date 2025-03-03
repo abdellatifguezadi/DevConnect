@@ -20,6 +20,29 @@
     <div class="min-h-screen bg-gray-100">
         @include('layouts.navigation')
 
+        <!-- Affichage des erreurs de validation -->
+        <x-validation-errors />
+        
+        <!-- Affichage des messages de succès -->
+        @if(session('success'))
+        <div class="fixed top-20 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg"
+            x-data="{ show: true }"
+            x-show="show"
+            x-init="setTimeout(() => show = false, 3000)">
+            {{ session('success') }}
+        </div>
+        @endif
+
+        <!-- Affichage des messages d'erreur -->
+        @if(session('error'))
+        <div class="fixed top-20 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg"
+            x-data="{ show: true }"
+            x-show="show"
+            x-init="setTimeout(() => show = false, 3000)">
+            {{ session('error') }}
+        </div>
+        @endif
+
         <!-- Page Heading -->
         @isset($header)
         <header class="bg-white shadow">

@@ -12,41 +12,36 @@ class LikeSeeder extends Seeder
 {
     public function run()
     {
-        
         $users = User::all();
-        
-       
+
         Post::all()->each(function ($post) use ($users) {
-           
-            $randomUsers = $users->random(rand(0, 5));
-            
+            $randomUserCount = min(rand(0, 5), $users->count());
+            $randomUsers = $users->random($randomUserCount);
+
             foreach ($randomUsers as $user) {
                 Like::create([
                     'user_id' => $user->id,
                     'likeable_id' => $post->id,
                     'likeable_type' => Post::class
                 ]);
-                
-                
+
                 $post->increment('likes_count');
             }
         });
-        
-        // Liker des commentaires
+
         Comment::all()->each(function ($comment) use ($users) {
-            // Chaque commentaire reçoit entre 0 et 3 likes aléatoires
-            $randomUsers = $users->random(rand(0, 3));
-            
+            $randomUserCount = min(rand(0, 3), $users->count());
+            $randomUsers = $users->random($randomUserCount);
+
             foreach ($randomUsers as $user) {
                 Like::create([
                     'user_id' => $user->id,
                     'likeable_id' => $comment->id,
                     'likeable_type' => Comment::class
                 ]);
-                
-                // Mettre à jour le compteur de likes
+
                 $comment->increment('likes_count');
             }
         });
     }
-} 
+}

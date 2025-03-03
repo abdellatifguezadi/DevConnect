@@ -51,8 +51,9 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/connections/{connection}', [ConnectionController::class, 'removeConnection'])->name('connections.remove');
     Route::delete('/connections/{user}', [ConnectionController::class, 'destroy'])->name('connections.destroy');
 
-    // Recherche d'utilisateurs
+    // Recherche d'utilisateurs et hashtags
     Route::get('/search/users', [SearchController::class, 'searchUsers'])->name('search.users');
+    Route::get('/hashtags/{hashtag}', [SearchController::class, 'showHashtag'])->name('hashtags.show');
 });
 
 require __DIR__ . '/auth.php';

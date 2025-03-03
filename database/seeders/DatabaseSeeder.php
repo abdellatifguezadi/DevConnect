@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UserSeeder::class,
             SkillSeeder::class,
+            LanguageSeeder::class, // Add this before PostSeeder
             HashtagSeeder::class,
             PostSeeder::class,
             CommentSeeder::class,

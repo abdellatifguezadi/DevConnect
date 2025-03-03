@@ -14,8 +14,8 @@ class Post extends Model
         'user_id',
         'content',
         'code_snippet',
-        'programming_language',
-        'media'
+        'media',
+        'language_id'
     ];
 
     protected $casts = [
@@ -47,7 +47,12 @@ class Post extends Model
         if (!$user) {
             return false;
         }
-        
+
         return $this->likes()->where('user_id', $user->id)->exists();
     }
-} 
+
+    public function language()
+    {
+        return $this->belongsTo(Language::class);
+    }
+}

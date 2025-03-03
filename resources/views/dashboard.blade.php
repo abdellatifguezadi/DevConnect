@@ -85,15 +85,18 @@
                         </div>
                     </div>
 
-                    <div class="space-y-8"> 
-                        <div id="posts-container" class="space-y-8"> 
+                    <div class="space-y-8">
+                        <div id="posts-container" class="space-y-8">
                             @foreach($posts as $post)
+                            @if($post->language)
+                            <div class="text-xs text-gray-400 mb-2">{{ strtoupper($post->language->name) }}</div>
+                            @endif
                             @include('components.post-card', ['post' => $post])
                             @endforeach
                         </div>
 
 
-                        <div class="mt-8 flex justify-center gap-4"> 
+                        <div class="mt-8 flex justify-center gap-4">
                             @if ($posts->onFirstPage())
                             <span class="px-4 py-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed">
                                 Précédent
@@ -201,21 +204,27 @@
                         hover:file:bg-violet-100">
                 </div>
 
+                <!-- <div>
+                    <label class="block text-sm font-medium text-gray-700">Langue du contenu</label>
+                    <input type="text" name="language" required
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        placeholder="Entrez la langue du contenu">
+                </div> -->
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Langage de programmation</label>
+                    <input type="text" name="language"
+                        class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        placeholder="Spécifiez le langage">
+                </div>
+
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Code</label>
                     <textarea name="code_snippet" rows="6"
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 font-mono"
                         placeholder="Collez votre code ici..."></textarea>
 
-                    <select name="programming_language"
-                        class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                        <option value="">Sélectionnez un langage</option>
-                        <option value="php">PHP</option>
-                        <option value="javascript">JavaScript</option>
-                        <option value="python">Python</option>
-                        <option value="java">Java</option>
-                        <option value="cpp">C++</option>
-                    </select>
+
                 </div>
 
                 <!-- <div>

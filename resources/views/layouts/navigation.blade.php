@@ -106,56 +106,55 @@
 </nav>
 
 <script>
-    // Attendre que le DOM soit chargé
+
     document.addEventListener('DOMContentLoaded', function() {
         const searchInput = document.getElementById('search-input');
         const searchResults = document.getElementById('search-results');
         let searchTimeout;
 
-        // Écouter les événements de frappe
         searchInput.addEventListener('input', function() {
             clearTimeout(searchTimeout);
 
             const query = this.value.trim();
 
-            // Cacher les résultats si la requête est vide
             if (query === '') {
                 searchResults.innerHTML = '';
                 searchResults.classList.add('hidden');
                 return;
             }
 
-            // Attendre 300ms après la dernière frappe pour lancer la recherche
+
             searchTimeout = setTimeout(() => {
                 fetchSearchResults(query);
             }, 300);
         });
 
-        // Cliquer en dehors ferme les résultats
         document.addEventListener('click', function(e) {
             if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
                 searchResults.classList.add('hidden');
             }
         });
 
-        // Fonction pour chercher des résultats
         function fetchSearchResults(query) {
-            if (query.length < 2) return; // Minimum 2 caractères
+            if (query.length < 2) return;
 
             fetch(`/search/users?query=${encodeURIComponent(query)}`)
                 .then(response => response.json())
                 .then(data => {
-                    displaySearchResults(data.users);
+  
+                    displaySearchResults(data.users, data.hashtags || []);
                 })
                 .catch(error => console.error('Erreur:', error));
         }
 
-        // Afficher les résultats
-        function displaySearchResults(users) {
+        function displaySearchResults(users, hashtags) {
             searchResults.innerHTML = '';
 
-            if (users.length === 0) {
-                searchResults.innerHTML = '<div class="px-4 py-3 text-gray-500">Aucun utilisateur trouvé</div>';
+            if (!users) users = [];
+            if (!hashtags) hashtags = [];
+
+            if (users.length === 0 && hashtags.length === 0) {
+                searchResults.innerHTML = '<div class="px-4 py-3 text-gray-500">Aucun résultat trouvé</div>';
                 searchResults.classList.remove('hidden');
                 return;
             }
@@ -163,23 +162,60 @@
             const resultsList = document.createElement('div');
             resultsList.className = 'max-h-[70vh] overflow-y-auto';
 
-            users.forEach(user => {
-                const userElement = document.createElement('a');
-                userElement.href = user.url;
-                userElement.className = 'flex items-center px-4 py-3 hover:bg-gray-100 border-b border-gray-100 last:border-0';
 
-                userElement.innerHTML = `
-                    <div class="mr-4">
-                        <img src="${user.avatar}" class="w-10 h-10 rounded-full object-cover" alt="${user.name}">
-                    </div>
-                    <div>
-                        <div class="font-medium text-gray-900">${user.name}</div>
-                        <div class="text-sm text-gray-500">${user.title}</div>
-                    </div>
-                `;
+            if (hashtags && hashtags.length > 0) {
+                const hashtagsSection = document.createElement('div');
+                hashtagsSection.innerHTML = '<div class="px-4 py-2 bg-gray-100 font-medium text-gray-700">Hashtags</div>';
+                resultsList.appendChild(hashtagsSection);
 
-                resultsList.appendChild(userElement);
-            });
+                hashtags.forEach(hashtag => {
+                    const hashtagElement = document.createElement('a');
+                    hashtagElement.href = hashtag.url;
+                    hashtagElement.className = 'flex items-center px-4 py-3 hover:bg-gray-100 border-b border-gray-100';
+
+                    hashtagElement.innerHTML = `
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 flex items-center justify-center rounded-full bg-blue-100 mr-4">
+                                <span class="text-blue-500 font-bold">#</span>
+                            </div>
+                            <div>
+                                <div class="font-medium text-gray-900">#${hashtag.name}</div>
+                                <div class="text-sm text-gray-500">${hashtag.posts_count} publication${hashtag.posts_count > 1 ? 's' : ''}</div>
+                            </div>
+                        </div>
+                    `;
+
+                    resultsList.appendChild(hashtagElement);
+                });
+            }
+
+            if (users.length > 0) {
+                
+                if (hashtags && hashtags.length > 0) {
+                    const usersSection = document.createElement('div');
+                    usersSection.innerHTML = '<div class="px-4 py-2 bg-gray-100 font-medium text-gray-700">Utilisateurs</div>';
+                    resultsList.appendChild(usersSection);
+                }
+
+               
+                users.forEach(user => {
+                    const userElement = document.createElement('a');
+                    userElement.href = user.url;
+                    userElement.className = 'flex items-center px-4 py-3 hover:bg-gray-100 border-b border-gray-100 last:border-0';
+
+                    userElement.innerHTML = `
+                        <div class="mr-4">
+                            <img src="${user.avatar}" class="w-10 h-10 rounded-full object-cover" alt="${user.name}">
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-900">${user.name}</div>
+                            <div class="text-sm text-gray-500">${user.title}</div>
+                        </div>
+                    `;
+
+                    resultsList.appendChild(userElement);
+                });
+            }
 
             searchResults.appendChild(resultsList);
             searchResults.classList.remove('hidden');

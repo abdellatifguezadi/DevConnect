@@ -65,6 +65,7 @@
                 @endforeach
             </div>
         </div>
+        
     </div>
     <div class="flex justify-end space-x-3 mt-8">
         <button type="button" onclick="closeEditProfile()"
