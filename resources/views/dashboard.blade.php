@@ -230,13 +230,14 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Photos</label>
-                    <input type="file" name="images[]" multiple accept="image/*"
+                    <input type="file" id="media" name="images[]" multiple accept="image/*"
                         class="mt-1 block w-full text-sm text-gray-500
                         file:mr-4 file:py-2 file:px-4
                         file:rounded-full file:border-0
                         file:text-sm file:font-semibold
                         file:bg-violet-50 file:text-violet-700
                         hover:file:bg-violet-100">
+                    <div id="media-preview" class="hidden mt-2 grid grid-cols-3 gap-2"></div>
                 </div>
 
                 <div>
@@ -248,6 +249,7 @@
                         file:text-sm file:font-semibold
                         file:bg-violet-50 file:text-violet-700
                         hover:file:bg-violet-100">
+                    <div id="video-preview" class="hidden mt-2 grid grid-cols-2 gap-2"></div>
                 </div>
 
                 <!-- <div>

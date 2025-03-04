@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use Illuminate\Http\Request;
+use App\Notifications\LikeNotification;
 
 class LikeController extends Controller
 {
@@ -22,6 +23,11 @@ class LikeController extends Controller
                 ]);
                 $post->increment('likes_count');
                 $isLiked = true;
+                
+                // Send notification to post owner if it's not the current user
+                if ($post->user_id !== auth()->id()) {
+                    $post->user->notify(new LikeNotification($post, auth()->user()));
+                }
             }
 
             $post->refresh();

@@ -11,6 +11,7 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
     @vite('resources/css/app.css')
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -22,7 +23,7 @@
 
         <!-- Affichage des erreurs de validation -->
         <x-validation-errors />
-        
+
         <!-- Affichage des messages de succès -->
         @if(session('success'))
         <div class="fixed top-20 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg"

@@ -5,12 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Connection;
 use Illuminate\Http\Request;
+use App\Notifications\ConnectionNotification;
 
 class ConnectionController extends Controller
 {
     public function sendRequest(User $user)
     {
-  
         $existingConnection = Connection::where(function($query) use ($user) {
             $query->where('requester_id', auth()->id())
                   ->where('requested_id', $user->id);
@@ -23,12 +23,15 @@ class ConnectionController extends Controller
             return back()->with('error', 'Une demande de connexion existe déjà avec cet utilisateur.');
         }
 
-
-        Connection::create([
+        $connection = Connection::create([
             'requester_id' => auth()->id(),
             'requested_id' => $user->id,
             'status' => 'pending'
         ]);
+        
+        // Send notification to the requested user
+        $notification = new ConnectionNotification($connection, auth()->user());
+        $user->notify($notification);
 
         return back()->with('success', 'Demande de connexion envoyée avec succès.');
     }
@@ -46,7 +49,6 @@ class ConnectionController extends Controller
 
     public function rejectRequest(Connection $connection)
     {
-        
         if ($connection->requested_id !== auth()->id()) {
             return back()->with('error', 'Vous n\'êtes pas autorisé à refuser cette demande.');
         }
@@ -58,7 +60,6 @@ class ConnectionController extends Controller
 
     public function cancelRequest(Connection $connection)
     {
-        
         if ($connection->requester_id !== auth()->id()) {
             return back()->with('error', 'Vous n\'êtes pas autorisé à annuler cette demande.');
         }
@@ -70,7 +71,6 @@ class ConnectionController extends Controller
 
     public function removeConnection(Connection $connection)
     {
-        
         if (!in_array(auth()->id(), [$connection->requester_id, $connection->requested_id])) {
             return back()->with('error', 'Vous n\'êtes pas autorisé à supprimer cette connexion.');
         }

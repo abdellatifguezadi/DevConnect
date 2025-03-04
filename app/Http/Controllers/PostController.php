@@ -8,6 +8,8 @@ use App\Models\Comment;
 use App\Models\Hashtag;
 use App\Models\Language;
 use Illuminate\Http\Request;
+use App\Notifications\LikeNotification;
+use App\Notifications\CommentNotification;
 
 class PostController extends Controller
 {
@@ -47,8 +49,11 @@ class PostController extends Controller
         $postsCount = $user->posts()->count();
         $connectionsCount = $user->connections()->count();
         $posts = collect([$post]);
+        
+        // Load user skills to fix the undefined variable error
+        $userSkills = $user->skills;
 
-        return view('profile.show', compact('user', 'posts', 'postsCount', 'connectionsCount'));
+        return view('profile.show', compact('user', 'posts', 'postsCount', 'connectionsCount', 'userSkills'));
     }
 
     public function store(Request $request)
@@ -195,6 +200,11 @@ class PostController extends Controller
         ]);
 
         $comment->load('user.profile');
+        
+        // Send notification to post owner if it's not the current user
+        if ($post->user_id !== auth()->id()) {
+            $post->user->notify(new CommentNotification($comment, auth()->user()));
+        }
 
         $html = view('components.comment', ['comment' => $comment])->render();
 
@@ -255,6 +265,11 @@ class PostController extends Controller
             ]);
             $post->increment('likes_count');
             $message = 'Post liké';
+            
+            // Send notification to post owner if it's not the current user
+            if ($post->user_id !== auth()->id()) {
+                $post->user->notify(new LikeNotification($post, auth()->user()));
+            }
         }
 
         return back()->with('success', $message);

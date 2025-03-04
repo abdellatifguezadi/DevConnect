@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Post;
 use App\Models\Comment;
 use Illuminate\Http\Request;
+use App\Notifications\CommentNotification;
 
 class CommentController extends Controller
 {
@@ -18,6 +19,11 @@ class CommentController extends Controller
         ]);
 
         $comment->load('user.profile');
+        
+        // Send notification to post owner if it's not the current user
+        if ($post->user_id !== auth()->id()) {
+            $post->user->notify(new CommentNotification($comment, auth()->user()));
+        }
 
         return response()->json([
             'success' => true,
@@ -46,6 +52,9 @@ class CommentController extends Controller
     public function destroy(Comment $comment)
     {
         abort_if($comment->user_id !== auth()->id(), 403);
+        
+        $post_id = $comment->post_id;
+        $comment_id = $comment->id;
         
         $comment->delete();
 

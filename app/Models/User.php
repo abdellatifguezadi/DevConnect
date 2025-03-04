@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Broadcasting\PrivateChannel;
 
 class User extends Authenticatable
 {
@@ -133,4 +134,14 @@ class User extends Authenticatable
     //     $connection = $this->getConnectionStatus($otherUser);
     //     return $connection && $connection->status === 'pending';
     // }
+
+    /**
+     * Get the channels that model events should broadcast on.
+     *
+     * @return array<int, \Illuminate\Broadcasting\Channel>
+     */
+    public function receivesBroadcastNotificationsOn()
+    {
+        return 'App.Models.User.' . $this->id;
+    }
 }
