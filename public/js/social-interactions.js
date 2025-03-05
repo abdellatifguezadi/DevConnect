@@ -3,6 +3,8 @@ document.addEventListener("DOMContentLoaded", function () {
         .querySelector('meta[name="csrf-token"]')
         .getAttribute("content");
 
+    window.initializedElements = window.initializedElements || new Set();
+
     async function fetchWithAuth(url, options = {}) {
         const defaultHeaders = {
             "X-CSRF-TOKEN": csrfToken,
@@ -20,151 +22,160 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            return { success: false };
         }
 
         return response.json();
     }
 
-    async function handleLike(button) {
-        try {
-            const postId = button.dataset.postId;
-            const data = await fetchWithAuth(`/posts/${postId}/toggle-like`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-            });
-
-            if (data.success) {
-                const likeCount = button.querySelector(".like-count");
-                const likeIcon = button.querySelector("svg");
-
-                if (likeCount) likeCount.textContent = data.likes_count;
-
-                if (likeIcon) {
-                    likeIcon.classList.toggle("text-blue-500", data.isLiked);
-                    likeIcon.setAttribute(
-                        "fill",
-                        data.isLiked ? "currentColor" : "none"
-                    );
-                }
-            }
-        } catch (error) {
-            alert("Une erreur est survenue lors du like");
+    window.handleLike = async function(button) {
+        if (button.dataset.processing === "true") {
+            return;
         }
-    }
+        
+        button.dataset.processing = "true";
+        
+        const postId = button.dataset.postId;
+        
+        const data = await fetchWithAuth(`/posts/${postId}/toggle-like`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+        });
 
-    async function handleComment(form) {
-        try {
-            const postId = form.dataset.postId;
-            const formData = new FormData(form);
+        if (data.success) {
+            const likeCount = button.querySelector(".like-count");
+            const likeIcon = button.querySelector("svg");
 
-            const data = await fetchWithAuth(form.action, {
-                method: "POST",
-                body: formData,
-            });
+            if (likeCount) likeCount.textContent = data.likes_count;
 
-            if (data.success) {
-                const commentsList = document.querySelector(
-                    `#comments-${postId} .comments-list`
+            if (likeIcon) {
+                likeIcon.classList.toggle("text-blue-500", data.isLiked);
+                likeIcon.setAttribute(
+                    "fill",
+                    data.isLiked ? "currentColor" : "none"
                 );
-                if (commentsList) {
-                    // Changement de beforeend à afterbegin pour ajouter au début
-                    commentsList.insertAdjacentHTML("afterbegin", data.html);
-                    form.reset();
-
-                    const commentCount = document.querySelector(
-                        `.comment-count[data-post-id="${postId}"]`
-                    );
-                    if (commentCount) {
-                        commentCount.textContent =
-                            parseInt(commentCount.textContent || "0") + 1;
-                    }
-
-                    // Attacher les événements au premier enfant plutôt qu'au dernier
-                    attachCommentEvents(commentsList.firstElementChild);
-                }
             }
-        } catch (error) {
-            alert("Une erreur est survenue lors de l'ajout du commentaire");
         }
-    }
+        
+        setTimeout(() => {
+            button.dataset.processing = "false";
+        }, 300);
+    };
 
-    async function handleEditComment(form) {
-        try {
-            const commentId = form.dataset.commentId;
-            const formData = new FormData(form);
+    window.handleComment = async function(form) {
+        if (form.dataset.processing === "true") {
+            return;
+        }
+        
+        form.dataset.processing = "true";
+        
+        const postId = form.dataset.postId;
+        const formData = new FormData(form);
 
-            const data = await fetchWithAuth(form.action, {
-                method: "POST",
-                body: formData,
-            });
+        const data = await fetchWithAuth(form.action, {
+            method: "POST",
+            body: formData,
+        });
 
-            if (data.success) {
-                const commentElement = document.querySelector(
-                    `#comment-${commentId}`
-                );
-                if (commentElement) {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(data.html, "text/html");
-                    const newComment = doc.body.firstElementChild;
-
-                    commentElement.replaceWith(newComment);
-
-                    attachCommentEvents(newComment);
-                }
-            }
-        } catch (error) {
-            alert(
-                "Une erreur est survenue lors de la modification du commentaire"
+        if (data.success) {
+            const commentsList = document.querySelector(
+                `#comments-${postId} .comments-list`
             );
-        }
-    }
+            if (commentsList) {
+                commentsList.insertAdjacentHTML("afterbegin", data.html);
+                form.reset();
 
-    async function handleDeleteComment(button) {
+                const commentCount = document.querySelector(
+                    `button[data-post-id="${postId}"] .comment-count`
+                );
+                if (commentCount) {
+                    commentCount.textContent =
+                        parseInt(commentCount.textContent || "0") + 1;
+                }
+
+                const newComment = commentsList.firstElementChild;
+                if (newComment) {
+                    const commentId = newComment.id?.replace('comment-', '');
+                    if (commentId) {
+                        window.initializedElements.add(`comment-${commentId}`);
+                        window.attachCommentEvents(newComment);
+                    }
+                }
+            }
+        }
+        
+        setTimeout(() => {
+            form.dataset.processing = "false";
+        }, 300);
+    };
+
+    window.handleEditComment = async function(form) {
+        const commentId = form.dataset.commentId;
+        const formData = new FormData(form);
+
+        const data = await fetchWithAuth(form.action, {
+            method: "POST",
+            body: formData,
+        });
+
+        if (data.success) {
+            const commentElement = document.querySelector(
+                `#comment-${commentId}`
+            );
+            if (commentElement) {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(data.html, "text/html");
+                const newComment = doc.body.firstElementChild;
+
+                commentElement.replaceWith(newComment);
+
+                window.attachCommentEvents(newComment);
+            }
+        }
+    };
+
+    window.handleDeleteComment = async function(button) {
         if (!confirm("Êtes-vous sûr de vouloir supprimer ce commentaire ?")) {
             return;
         }
 
-        try {
-            const commentId = button.dataset.commentId;
-            const postId = button.dataset.postId;
+        const commentId = button.dataset.commentId;
+        const postId = button.dataset.postId;
 
-            const data = await fetchWithAuth(button.dataset.url, {
-                method: "DELETE",
-                headers: { "Content-Type": "application/json" },
-            });
+        const data = await fetchWithAuth(button.dataset.url, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+        });
 
-            if (data.success) {
-                const comment = document.querySelector(`#comment-${commentId}`);
-                if (comment) {
-                    comment.remove();
+        if (data.success) {
+            const comment = document.querySelector(`#comment-${commentId}`);
+            if (comment) {
+                comment.remove();
 
-                    const commentCount = document.querySelector(
-                        `.comment-count[data-post-id="${postId}"]`
+                const commentCount = document.querySelector(
+                    `.comment-count[data-post-id="${postId}"]`
+                );
+                if (commentCount) {
+                    commentCount.textContent = Math.max(
+                        0,
+                        parseInt(commentCount.textContent || "0") - 1
                     );
-                    if (commentCount) {
-                        commentCount.textContent = Math.max(
-                            0,
-                            parseInt(commentCount.textContent || "0") - 1
-                        );
-                    }
                 }
             }
-        } catch (error) {
-            alert(
-                "Une erreur est survenue lors de la suppression du commentaire"
-            );
         }
-    }
+    };
 
-    function attachCommentEvents(commentElement) {
+    window.attachCommentEvents = function(commentElement) {
         if (!commentElement) return;
+
+        const commentId = commentElement.id?.replace('comment-', '');
+        if (!commentId) return;
 
         const editForm = commentElement.querySelector(".edit-comment-form");
         if (editForm) {
             editForm.addEventListener("submit", (e) => {
                 e.preventDefault();
-                handleEditComment(editForm);
+                window.handleEditComment(editForm);
             });
         }
 
@@ -172,10 +183,10 @@ document.addEventListener("DOMContentLoaded", function () {
         if (deleteButton) {
             deleteButton.addEventListener("click", (e) => {
                 e.preventDefault();
-                handleDeleteComment(deleteButton);
+                window.handleDeleteComment(deleteButton);
             });
         }
-    }
+    };
 
     window.toggleEditComment = function (commentId) {
         const editForm = document.querySelector(`#edit-comment-${commentId}`);
@@ -200,18 +211,18 @@ document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll(".like-button").forEach((button) => {
         button.addEventListener("click", (e) => {
             e.preventDefault();
-            handleLike(button);
+            window.handleLike(button);
         });
     });
 
     document.querySelectorAll(".comment-form").forEach((form) => {
         form.addEventListener("submit", (e) => {
             e.preventDefault();
-            handleComment(form);
+            window.handleComment(form);
         });
     });
 
     document.querySelectorAll(".comment").forEach((comment) => {
-        attachCommentEvents(comment);
+        window.attachCommentEvents(comment);
     });
 });

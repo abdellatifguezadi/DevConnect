@@ -24,6 +24,7 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [PostController::class, 'index'])->name('dashboard');
+    Route::get('/load-more-posts', [PostController::class, 'loadMorePosts'])->name('posts.loadMore');
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
     Route::put('/posts/{post}', [PostController::class, 'update'])->name('posts.update');
     Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');

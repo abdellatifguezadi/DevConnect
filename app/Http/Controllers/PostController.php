@@ -38,6 +38,26 @@ class PostController extends Controller
         return view('dashboard', compact('posts', 'trendingTags', 'user', 'postsCount', 'connectionsCount'));
     }
 
+    /**
+     * Load more posts for infinite scrolling
+     */
+    public function loadMorePosts(Request $request)
+    {
+        $posts = Post::with(['user.profile', 'comments.user.profile', 'hashtags'])
+            ->withCount(['comments', 'likes'])
+            ->latest()
+            ->paginate(10);
+
+        $view = view('components.posts', compact('posts'))->render();
+        
+        return response()->json([
+            'html' => $view,
+            'hasMorePages' => $posts->hasMorePages(),
+            'currentPage' => $posts->currentPage(),
+            'totalPages' => $posts->lastPage()
+        ]);
+    }
+
     public function show(Post $post)
     {
         $post->load(['user.profile', 'comments.user.profile', 'hashtags'])

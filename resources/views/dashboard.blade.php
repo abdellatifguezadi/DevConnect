@@ -95,33 +95,14 @@
                             @endforeach
                         </div>
 
+                        <!-- Loading indicator for infinite scrolling -->
+                        <div id="loading-indicator" class="mt-8 flex justify-center hidden">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                        </div>
 
-                        <div class="mt-8 flex justify-center gap-4">
-                            @if ($posts->onFirstPage())
-                            <span class="px-4 py-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed">
-                                Précédent
-                            </span>
-                            @else
-                            <a href="{{ $posts->previousPageUrl() }}"
-                                class="px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 rounded-lg shadow transition duration-200">
-                                Précédent
-                            </a>
-                            @endif
-
-                            <span class="px-4 py-2 bg-white text-gray-600 rounded-lg">
-                                Page {{ $posts->currentPage() }} sur {{ $posts->lastPage() }}
-                            </span>
-
-                            @if ($posts->hasMorePages())
-                            <a href="{{ $posts->nextPageUrl() }}"
-                                class="px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 rounded-lg shadow transition duration-200">
-                                Suivant
-                            </a>
-                            @else
-                            <span class="px-4 py-2 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed">
-                                Suivant
-                            </span>
-                            @endif
+                        <!-- No more posts indicator -->
+                        <div id="no-more-posts" class="mt-8 text-center text-gray-500 hidden">
+                            Pas d'autres publications à afficher
                         </div>
                     </div>
                 </div>
