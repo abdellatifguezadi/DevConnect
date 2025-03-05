@@ -6,6 +6,7 @@ use App\Http\Controllers\LikeController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ConnectionController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\TweetController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -30,6 +31,12 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
     Route::post('/posts/{post}/toggle-like', [LikeController::class, 'togglePostLike'])->name('posts.like');
     Route::post('/posts/{post}/comments', [CommentController::class, 'store'])->name('comments.store');
+
+
+    Route::get('/tweet', [TweetController::class, 'create'])->name('tweets.create');
+    Route::post('/tweets', [TweetController::class, 'store'])->name('tweets.store');
+    Route::view('pusher1', 'pusher1');
+    Route::view('pusher2', 'pusher2');
 
     // Profile routes
     Route::get('/profile/{user}', [ProfileController::class, 'show'])->name('profile.show');

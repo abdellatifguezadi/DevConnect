@@ -53,14 +53,14 @@
                 @endif
                 @endif
                 @if($post->user_id === auth()->id())
-                <div class="relative" x-data="{ open: false }">
-                    <button @click="open = !open" class="text-gray-400 hover:text-gray-600">
+                <div class="relative dropdown-container" id="dropdown-{{ $post->id }}">
+                    <button onclick="toggleDropdown('{{ $post->id }}')" class="text-gray-400 hover:text-gray-600">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
                         </svg>
                     </button>
-                    <div x-show="open" @click.away="open = false" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
-                        <button onclick="openEditPost('{{ $post->id }}', '{{ $post->content }}', '{{ $post->language->name }}', '{{ $post->code_snippet }}')"
+                    <div id="dropdown-menu-{{ $post->id }}" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 hidden">
+                        <button onclick="openEditPost('{{ $post->id }}', '{{ addslashes($post->content) }}', '{{ $post->language->name ?? '' }}', '{{ addslashes($post->code_snippet ?? '') }}')"
                             class="block w-full text-left px-4 py-2 text-blue-600 hover:bg-gray-100">
                             Modifier
                         </button>

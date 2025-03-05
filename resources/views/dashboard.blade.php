@@ -55,28 +55,25 @@
                             <img src="{{ auth()->user()->profile?->avatar ?? 'https://avatar.iran.liara.run/public/boy' }}"
                                 class="w-12 h-12 rounded-full"
                                 alt="{{ auth()->user()->name }}">
-                            <button x-data="" @click="$dispatch('open-modal', 'create-post')"
-                                class="flex-grow text-left px-4 py-3 rounded-full border border-gray-300 hover:bg-gray-100 text-gray-500">
+                            <button class="open-create-post-btn flex-grow text-left px-4 py-3 rounded-full border border-gray-300 hover:bg-gray-100 text-gray-500">
                                 Commencer un post
                             </button>
                         </div>
                         <div class="flex justify-between mt-4 pt-2 border-t">
-                            <button x-data="" @click="$dispatch('open-modal', 'create-post')" class="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-lg text-gray-600">
+                            <button class="open-create-post-btn flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-lg text-gray-600">
                                 <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                                 <span>Photo</span>
                             </button>
-                            <button x-data="" @click="$dispatch('open-modal', 'create-post')"
-                                class="flex items-center space-x-2 text-gray-500 hover:text-blue-500 p-2 rounded-md hover:bg-gray-100">
+                            <button class="open-create-post-btn flex items-center space-x-2 text-gray-500 hover:text-blue-500 p-2 rounded-md hover:bg-gray-100">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                 </svg>
                                 <span>Vidéo</span>
                             </button>
-                            <button x-data="" @click="$dispatch('open-modal', 'create-post')"
-                                class="flex items-center space-x-2 text-gray-500 hover:text-blue-500 p-2 rounded-md hover:bg-gray-100">
+                            <button class="open-create-post-btn flex items-center space-x-2 text-gray-500 hover:text-blue-500 p-2 rounded-md hover:bg-gray-100">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                                 </svg>
@@ -147,8 +144,19 @@
     }
 
     function openEditPost(postId, content, language, codeSnippet, imageUrl, videoUrl) {
+        console.log('Opening edit modal for post:', postId);
         const modal = document.getElementById('editPostModal');
+        if (!modal) {
+            console.error('Edit post modal not found!');
+            return;
+        }
+        
         const form = document.getElementById('editPostForm');
+        if (!form) {
+            console.error('Edit post form not found!');
+            return;
+        }
+        
         const contentTextarea = document.getElementById('editPostContent');
         const languageInput = document.getElementById('editPostLanguage');
         const codeSnippetTextarea = document.getElementById('editPostCodeSnippet');
@@ -158,7 +166,10 @@
         const currentVideo = document.getElementById('currentVideo');
 
         form.action = `/posts/${postId}`;
-        contentTextarea.value = content;
+        
+        if (contentTextarea) {
+            contentTextarea.value = content || '';
+        }
 
         if (languageInput) {
             languageInput.value = language || '';
@@ -169,110 +180,62 @@
         }
 
         // Handle image preview
-        if (imageUrl && imageUrl !== 'undefined' && imageUrl !== 'null') {
-            currentImage.src = imageUrl;
-            currentImagePreview.classList.remove('hidden');
-        } else {
-            currentImagePreview.classList.add('hidden');
+        if (currentImage && currentImagePreview) {
+            if (imageUrl && imageUrl !== 'undefined' && imageUrl !== 'null') {
+                currentImage.src = imageUrl;
+                currentImagePreview.classList.remove('hidden');
+            } else {
+                currentImagePreview.classList.add('hidden');
+            }
         }
 
         // Handle video preview
-        if (videoUrl && videoUrl !== 'undefined' && videoUrl !== 'null') {
-            currentVideo.src = videoUrl;
-            currentVideoPreview.classList.remove('hidden');
-        } else {
-            currentVideoPreview.classList.add('hidden');
+        if (currentVideo && currentVideoPreview) {
+            if (videoUrl && videoUrl !== 'undefined' && videoUrl !== 'null') {
+                currentVideo.src = videoUrl;
+                currentVideoPreview.classList.remove('hidden');
+            } else {
+                currentVideoPreview.classList.add('hidden');
+            }
         }
 
         modal.classList.remove('hidden');
+        console.log('Modal opened successfully');
     }
 
     function closeEditPost() {
         const modal = document.getElementById('editPostModal');
         modal.classList.add('hidden');
     }
+    
+    function toggleDropdown(postId) {
+        const dropdownMenu = document.getElementById(`dropdown-menu-${postId}`);
+        if (dropdownMenu) {
+            dropdownMenu.classList.toggle('hidden');
+            
+            // Close other open dropdowns
+            document.querySelectorAll('.dropdown-container').forEach(container => {
+                if (container.id !== `dropdown-${postId}`) {
+                    const menu = container.querySelector('div[id^="dropdown-menu-"]');
+                    if (menu && !menu.classList.contains('hidden')) {
+                        menu.classList.add('hidden');
+                    }
+                }
+            });
+            
+            // Close this dropdown when clicking outside
+            document.addEventListener('click', function closeDropdown(event) {
+                const container = document.getElementById(`dropdown-${postId}`);
+                if (container && !container.contains(event.target)) {
+                    dropdownMenu.classList.add('hidden');
+                    document.removeEventListener('click', closeDropdown);
+                }
+            });
+        }
+    }
 </script>
 
-<x-modal name="create-post" :show="$errors->createPost->isNotEmpty()" focusable>
-    <div class="p-6">
-        <h2 class="text-lg font-medium text-gray-900">
-            Créer un nouveau post
-        </h2>
-
-        <form method="POST" action="{{ route('posts.store') }}" enctype="multipart/form-data">
-            @csrf
-            <div class="mt-6">
-                <textarea name="content" rows="4"
-                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    placeholder="Que souhaitez-vous partager ?"></textarea>
-            </div>
-
-            <div class="mt-4 space-y-4">
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Photos</label>
-                    <input type="file" name="images[]" multiple accept="image/*"
-                        class="mt-1 block w-full text-sm text-gray-500
-                        file:mr-4 file:py-2 file:px-4
-                        file:rounded-full file:border-0
-                        file:text-sm file:font-semibold
-                        file:bg-violet-50 file:text-violet-700
-                        hover:file:bg-violet-100">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Vidéos</label>
-                    <input type="file" name="videos[]" multiple accept="video/*"
-                        class="mt-1 block w-full text-sm text-gray-500
-                        file:mr-4 file:py-2 file:px-4
-                        file:rounded-full file:border-0
-                        file:text-sm file:font-semibold
-                        file:bg-violet-50 file:text-violet-700
-                        hover:file:bg-violet-100">
-                </div>
-
-                <!-- <div>
-                    <label class="block text-sm font-medium text-gray-700">Langue du contenu</label>
-                    <input type="text" name="language" required
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                        placeholder="Entrez la langue du contenu">
-                </div> -->
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Langage de programmation</label>
-                    <input type="text" name="language"
-                        class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                        placeholder="Spécifiez le langage">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Code</label>
-                    <textarea name="code_snippet" rows="6"
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 font-mono"
-                        placeholder="Collez votre code ici..."></textarea>
-
-
-                </div>
-
-                <!-- <div>
-                    <label class="block text-sm font-medium text-gray-700">Hashtags</label>
-                    <input type="text" name="hashtags"
-                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                        placeholder="Ajoutez des hashtags (séparés par des espaces)">
-                </div> -->
-            </div>
-
-            <div class="mt-6 flex justify-end space-x-3">
-                <button type="button" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200" @click="$dispatch('close')">
-                    Annuler
-                </button>
-                <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
-                    Publier
-                </button>
-            </div>
-        </form>
-    </div>
-</x-modal>
+<!-- Le modal de création de post a été déplacé vers layouts/navigation.blade.php -->
 
 <div id="editPostModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto z-50">
     <div class="relative min-h-screen flex items-center justify-center p-4">

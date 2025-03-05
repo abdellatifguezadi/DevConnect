@@ -67,15 +67,14 @@
                 </a>
 
                 <!-- Nouveau Post -->
-                <button
-                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
-                    onclick="// Ajoutez ici la logique pour créer un nouveau post">
+                <button id="open-create-post-btn" 
+                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors duration-200">
                     Nouveau Post
                 </button>
 
                 <!-- Profile Dropdown -->
-                <div class="relative" x-data="{ open: false }">
-                    <button @click="open = !open" class="flex items-center space-x-2">
+                <div class="relative dropdown-container" id="dropdown-profile">
+                    <button onclick="toggleProfileDropdown()" class="flex items-center space-x-2">
                         <div class="h-8 w-8 rounded-full overflow-hidden">
                             <img src="{{ auth()->user()->profile?->avatar ?? 'https://avatar.iran.liara.run/public/boy' }}"
                                 alt="Profile"
@@ -87,9 +86,8 @@
                     </button>
 
                     <!-- Dropdown Menu -->
-                    <div x-show="open"
-                        @click.away="open = false"
-                        class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 text-gray-700">
+                    <div id="dropdown-menu-profile"
+                        class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 text-gray-700 hidden">
                         <a href="{{ route('profile.show', ['user' => auth()->id()]) }}" class="block px-4 py-2 hover:bg-gray-100">Mon Profil</a>
 
                         <form method="POST" action="{{ route('logout') }}">
@@ -245,4 +243,145 @@
             searchResults.classList.remove('hidden');
         }
     });
+
+    function toggleProfileDropdown() {
+        const dropdownMenu = document.getElementById('dropdown-menu-profile');
+        if (dropdownMenu) {
+            dropdownMenu.classList.toggle('hidden');
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function closeProfileDropdown(event) {
+                const container = document.getElementById('dropdown-profile');
+                if (container && !container.contains(event.target)) {
+                    dropdownMenu.classList.add('hidden');
+                    document.removeEventListener('click', closeProfileDropdown);
+                }
+            });
+        }
+    }
+</script>
+
+<!-- Formulaire de création de post (modal) -->
+<div id="create-post-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto z-50">
+    <div class="relative min-h-screen flex items-center justify-center p-4">
+        <div class="relative bg-white w-full max-w-md mx-auto rounded-2xl shadow-xl p-8">
+            <h2 class="text-lg font-medium text-gray-900 mb-6">
+                Créer un nouveau post
+            </h2>
+            <button id="close-create-post-btn-x" class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 transition-colors">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+
+            <form method="POST" action="{{ route('posts.store') }}" enctype="multipart/form-data">
+                @csrf
+                <div class="mt-6">
+                    <textarea name="content" rows="4"
+                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        placeholder="Que souhaitez-vous partager ?"></textarea>
+                </div>
+
+                <div class="mt-4 space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Photos</label>
+                        <input type="file" name="images[]" multiple accept="image/*"
+                            class="mt-1 block w-full text-sm text-gray-500
+                            file:mr-4 file:py-2 file:px-4
+                            file:rounded-full file:border-0
+                            file:text-sm file:font-semibold
+                            file:bg-violet-50 file:text-violet-700
+                            hover:file:bg-violet-100">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Vidéos</label>
+                        <input type="file" name="videos[]" multiple accept="video/*"
+                            class="mt-1 block w-full text-sm text-gray-500
+                            file:mr-4 file:py-2 file:px-4
+                            file:rounded-full file:border-0
+                            file:text-sm file:font-semibold
+                            file:bg-violet-50 file:text-violet-700
+                            hover:file:bg-violet-100">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Langage de programmation</label>
+                        <input type="text" name="language"
+                            class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                            placeholder="Spécifiez le langage">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Code</label>
+                        <textarea name="code_snippet" rows="6"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 font-mono"
+                            placeholder="Collez votre code ici..."></textarea>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button type="button" id="close-create-post-btn" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">
+                        Annuler
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                        Publier
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Bouton pour ouvrir le modal
+    const openBtn = document.getElementById('open-create-post-btn');
+    // Boutons avec classe pour ouvrir le modal
+    const openBtns = document.querySelectorAll('.open-create-post-btn');
+    // Boutons pour fermer le modal
+    const closeBtn = document.getElementById('close-create-post-btn');
+    const closeBtnX = document.getElementById('close-create-post-btn-x');
+    // Le modal lui-même
+    const modal = document.getElementById('create-post-modal');
+
+    // Fonction pour ouvrir le modal
+    function openModal() {
+        modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+    }
+
+    // Fonction pour fermer le modal
+    function closeModal() {
+        modal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    }
+
+    // Ajouter les événements click
+    if (openBtn) {
+        openBtn.addEventListener('click', openModal);
+    }
+    
+    // Ajouter les événements click pour tous les boutons avec la classe
+    if (openBtns.length > 0) {
+        openBtns.forEach(btn => {
+            btn.addEventListener('click', openModal);
+        });
+    }
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeModal);
+    }
+
+    if (closeBtnX) {
+        closeBtnX.addEventListener('click', closeModal);
+    }
+
+    // Fermer le modal en cliquant à l'extérieur
+    modal.addEventListener('click', function(event) {
+        if (event.target === modal) {
+            closeModal();
+        }
+    });
+});
 </script>
