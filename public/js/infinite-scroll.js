@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const noMorePosts = document.getElementById('no-more-posts');
     
     if (!postsContainer || !loadingIndicator || !noMorePosts) return;
-s
+
     initializeExistingElements();
     
     function initializeExistingElements() {

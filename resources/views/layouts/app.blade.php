@@ -67,7 +67,9 @@
     <script src="{{ asset('js/infinite-scroll.js') }}" defer></script>
     @endif
 
-    <script src="{{ asset('js/post-media-preview.js') }}"></script>
+    @if(file_exists(public_path('js/post-media-preview.js')))
+    <script src="{{ asset('js/post-media-preview.js') }}" defer></script>
+    @endif
     @stack('scripts')
 </body>
 
