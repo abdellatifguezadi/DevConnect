@@ -17,29 +17,31 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
-    <!-- <style>
-        [x-cloak] { display: none !important; }
-        
-        /* Notification Styles */
-        .toast-info .toast-message {
+    <!-- Styles pour Laravel Share -->
+    <style>
+        .social-button {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 0.5rem 1rem;
+            transition: background-color 150ms;
             display: flex;
             align-items: center;
+            gap: 0.5rem;
         }
-
-        .toast-info .toast-message i {
-            margin-right: 10px;
+        .social-button:hover {
+            background-color: rgba(0, 0, 0, 0.05);
         }
-
-        .toast-info .toast-message .notification-content {
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-        }
-    </style> -->
+        .social-button.facebook { color: #3b5998; }
+        .social-button.twitter { color: #1da1f2; }
+        .social-button.linkedin { color: #0077b5; }
+        .social-button.whatsapp { color: #25d366; }
+        .social-button.telegram { color: #0088cc; }
+    </style>
     
     @vite('resources/css/app.css')
     <!-- Scripts -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/share-functions.js'])
 </head>
 
 <body class="font-sans antialiased">
@@ -89,6 +91,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
     <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
     
+    <!-- Laravel Share Script -->
+    <script src="{{ asset('js/share.js') }}"></script>
+    
     <!-- Define Pusher configuration for the JS file -->
     <script>
         var PUSHER_APP_KEY = '{{ env('PUSHER_APP_KEY') }}';
@@ -110,6 +115,43 @@
     
     <!-- Pusher Notifications -->
     <script src="{{ asset('js/pusher-notifications.js') }}" defer></script>
+    
+    <!-- Script pour le partage social -->
+    <script>
+        // Fonction pour afficher/masquer le dropdown de partage
+        function toggleShareDropdown(postId) {
+            console.log('toggleShareDropdown appelé pour le post ID:', postId);
+            const dropdown = document.getElementById(`share-dropdown-${postId}`);
+            console.log('Dropdown element:', dropdown);
+            
+            // Fermer tous les autres dropdowns ouverts
+            document.querySelectorAll('.dropdown-container div[id^="share-dropdown-"]').forEach(el => {
+                if (el.id !== `share-dropdown-${postId}`) {
+                    el.classList.add('hidden');
+                }
+            });
+            
+            // Basculer la visibilité du dropdown actuel
+            dropdown.classList.toggle('hidden');
+            console.log('Dropdown visible:', !dropdown.classList.contains('hidden'));
+        }
+
+        // Fermer les dropdowns de partage si on clique ailleurs sur la page
+        document.addEventListener('click', function(event) {
+            const target = event.target;
+            
+            // Ne rien faire si on clique sur un bouton de partage ou dans un dropdown
+            if (target.closest('button[onclick^="toggleShareDropdown"]') || 
+                target.closest('div[id^="share-dropdown-"]')) {
+                return;
+            }
+            
+            // Fermer tous les dropdowns ouverts
+            document.querySelectorAll('div[id^="share-dropdown-"]').forEach(dropdown => {
+                dropdown.classList.add('hidden');
+            });
+        });
+    </script>
     
     @stack('scripts')
 </body>

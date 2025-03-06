@@ -68,7 +68,7 @@ class PostController extends Controller
         $connectionsCount = $user->connections()->count();
         $posts = collect([$post]);
 
-        return view('profile.show', compact('user', 'posts', 'postsCount', 'connectionsCount'));
+        return view('posts.show', compact('post', 'user', 'postsCount', 'connectionsCount'));
     }
 
     public function store(Request $request)

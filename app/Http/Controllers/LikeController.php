@@ -27,8 +27,7 @@ class LikeController extends Controller
                 $post->increment('likes_count');
                 $isLiked = true;
 
-                // Don't send notification if user liked their own post
-                if ($post->user_id != auth()->id()) {
+                if ($post->user_id != Auth::id()) {
                     $postOwner = User::find($post->user_id);
                     if ($postOwner) {
                         $postOwner->notify(new NotificationsLikeNotification($post));

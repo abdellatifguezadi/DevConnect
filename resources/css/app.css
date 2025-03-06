@@ -1,5 +1,34 @@
-@tailwind base;
-@tailwind components;
+@import "tailwindcss/preflight";
 @tailwind utilities;
 @import "tailwindcss";
 @source "../views";
+
+/* Styles pour les boutons de partage social */
+.social-button {
+    @apply block w-full text-left px-4 py-2 hover:bg-gray-100 transition duration-150 flex items-center space-x-2;
+}
+
+.social-button.facebook {
+    @apply text-blue-600;
+}
+
+.social-button.twitter {
+    @apply text-blue-400;
+}
+
+.social-button.linkedin {
+    @apply text-blue-700;
+}
+
+.social-button.whatsapp {
+    @apply text-green-500;
+}
+
+.social-button.telegram {
+    @apply text-blue-500;
+}
+
+/* Améliorer l'apparence du dropdown de partage */
+div[id^="share-dropdown-"] {
+    @apply rounded-md overflow-hidden z-20;
+}
