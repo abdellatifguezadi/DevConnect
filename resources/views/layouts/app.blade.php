@@ -5,6 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="user-id" content="{{ auth()->user()->id ?? '' }}">
 
     <title>{{ config('app.name', 'Laravel') }}</title>
 
@@ -12,8 +13,28 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
     
+    <!-- Toastr & Font Awesome for notifications -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
     <style>
         [x-cloak] { display: none !important; }
+        
+        /* Notification Styles */
+        .toast-info .toast-message {
+            display: flex;
+            align-items: center;
+        }
+
+        .toast-info .toast-message i {
+            margin-right: 10px;
+        }
+
+        .toast-info .toast-message .notification-content {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
     </style>
     
     @vite('resources/css/app.css')
@@ -63,6 +84,17 @@
         </main>
     </div>
 
+    <!-- jQuery, Toastr & Pusher Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+    
+    <!-- Define Pusher configuration for the JS file -->
+    <script>
+        var PUSHER_APP_KEY = '{{ env('PUSHER_APP_KEY') }}';
+        var PUSHER_APP_CLUSTER = '{{ env('PUSHER_APP_CLUSTER') }}';
+    </script>
+    
     <!-- Ajout de l'attribut defer et vérification que le fichier existe -->
     @if(file_exists(public_path('js/social-interactions.js')))
     <script src="{{ asset('js/social-interactions.js') }}" defer></script>
@@ -75,6 +107,10 @@
     @if(file_exists(public_path('js/post-media-preview.js')))
     <script src="{{ asset('js/post-media-preview.js') }}" defer></script>
     @endif
+    
+    <!-- Pusher Notifications -->
+    <script src="{{ asset('js/pusher-notifications.js') }}" defer></script>
+    
     @stack('scripts')
 </body>
 

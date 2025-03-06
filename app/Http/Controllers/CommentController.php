@@ -3,8 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Models\User;
 use App\Models\Comment;
+use App\Events\commentNotification;
+use App\Notifications\commentNotification as NotificationsCommentNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CommentController extends Controller
 {
@@ -19,6 +23,28 @@ class CommentController extends Controller
         ]);
 
         $comment->load('user.profile');
+
+        // Envoyer une notification au propriétaire du post
+        if ($post->user_id != auth()->id()) {
+            $postOwner = User::find($post->user_id);
+            if ($postOwner) {
+                $postOwner->notify(new NotificationsCommentNotification($post, $comment));
+            }
+
+            // Broadcast event
+            event(new commentNotification([
+                'post_id' => $post->id,
+                'comment_id' => $comment->id,
+                'author' => auth()->user()->name,
+                'author_id' => auth()->id(),
+                'content' => substr($comment->content ?? '', 0, 50),
+                'post_content' => substr($post->content ?? '', 0, 50),
+                'created_at' => now()->toDateTimeString(),
+                'message' => auth()->user()->name . ' a commenté votre post',
+                'post_owner_id' => $post->user_id,
+                'state' => true
+            ]));
+        }
 
         return response()->json([
             'success' => true,
