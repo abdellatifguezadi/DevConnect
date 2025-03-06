@@ -66,12 +66,31 @@
                 </a>
 
                 <!-- Notifications -->
-                <a href="#" class="flex items-center space-x-1 hover:text-blue-400 relative" title="Notifications">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                    </svg>
-                    <span class="absolute -top-1 -right-1 bg-red-500 rounded-full w-2 h-2"></span>
-                </a>
+                <div class="relative z-50">
+                    <button id="notification-bell-button" class="relative p-1 text-white hover:text-blue-400 focus:outline-none">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0h-6" />
+                        </svg>
+                        @if(auth()->user()->unreadNotifications->count() > 0)
+                        <span id="notification-unread-indicator" class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500"></span>
+                        @endif
+                    </button>
+
+                    <div id="notification-dropdown" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg py-1 z-50 transition-all duration-100 text-gray-900">
+                        <div class="max-h-96 overflow-y-auto" id="notification-list">
+                            <!-- notifications here -->
+                        </div>
+
+                        <div id="mark-all-container" class="hidden border-t border-gray-100 mt-2">
+                            <button id="mark-all-read" class="block w-full text-left px-4 py-2 text-sm text-blue-600 hover:bg-gray-50">
+                                Mark all as read
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+
 
                 <!-- Profile Dropdown -->
                 <div class="relative dropdown-container" id="dropdown-profile">
@@ -117,7 +136,7 @@
                 </svg>
                 <div id="mobile-search-results" class="absolute mt-1 w-full bg-white rounded-lg shadow-lg z-50 overflow-hidden hidden left-0"></div>
             </div>
-            
+
             <a href="{{ route('dashboard') }}" class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md">
                 Accueil
             </a>
@@ -293,14 +312,14 @@
             }
 
             if (users.length > 0) {
-                
+
                 if (hashtags && hashtags.length > 0) {
                     const usersSection = document.createElement('div');
                     usersSection.innerHTML = '<div class="px-4 py-2 bg-gray-100 font-medium text-gray-700">Utilisateurs</div>';
                     resultsList.appendChild(usersSection);
                 }
 
-               
+
                 users.forEach(user => {
                     const userElement = document.createElement('a');
                     userElement.href = user.url;
@@ -329,7 +348,7 @@
         const dropdownMenu = document.getElementById('dropdown-menu-profile');
         if (dropdownMenu) {
             dropdownMenu.classList.toggle('hidden');
-            
+
             // Close dropdown when clicking outside
             document.addEventListener('click', function closeProfileDropdown(event) {
                 const container = document.getElementById('dropdown-profile');
@@ -415,28 +434,364 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const modal = document.getElementById('create-post-modal');
-    const closeBtn = document.getElementById('close-create-post-btn');
-    const closeBtnX = document.getElementById('close-create-post-btn-x');
+    document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById('create-post-modal');
+        const closeBtn = document.getElementById('close-create-post-btn');
+        const closeBtnX = document.getElementById('close-create-post-btn-x');
 
-    function closeModal() {
-        modal.classList.add('hidden');
-        document.body.classList.remove('overflow-hidden');
-    }
+        function closeModal() {
+            modal.classList.add('hidden');
+            document.body.classList.remove('overflow-hidden');
+        }
 
-    if (closeBtn) {
-        closeBtn.addEventListener('click', closeModal);
-    }
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closeModal);
+        }
 
-    if (closeBtnX) {
-        closeBtnX.addEventListener('click', closeModal);
-    }
+        if (closeBtnX) {
+            closeBtnX.addEventListener('click', closeModal);
+        }
 
-    modal.addEventListener('click', function(event) {
-        if (event.target === modal) {
-            closeModal();
+        modal.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+    });
+</script>
+
+<!-- Notification Dropdown JavaScript -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const notificationBellButton = document.getElementById('notification-bell-button');
+        const notificationDropdown = document.getElementById('notification-dropdown');
+        const notificationList = document.getElementById('notification-list');
+        const markAllContainer = document.getElementById('mark-all-container');
+        const markAllReadButton = document.getElementById('mark-all-read');
+        const notificationIndicator = document.getElementById('notification-unread-indicator');
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        
+        let notificationsLoaded = false;
+        
+        // Toggle notification dropdown
+        if (notificationBellButton && notificationDropdown) {
+            notificationBellButton.addEventListener('click', function(e) {
+                e.stopPropagation();
+                notificationDropdown.classList.toggle('hidden');
+                
+                // Load notifications when dropdown is opened and not already loaded
+                if (!notificationDropdown.classList.contains('hidden') && !notificationsLoaded) {
+                    loadNotifications();
+                }
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (notificationDropdown && !notificationDropdown.classList.contains('hidden') 
+                    && !notificationBellButton.contains(e.target) 
+                    && !notificationDropdown.contains(e.target)) {
+                    notificationDropdown.classList.add('hidden');
+                }
+            });
+        }
+        
+        // Écouter les événements de notification Pusher
+        document.addEventListener('notification.received', function(event) {
+            const { type, data } = event.detail;
+            
+            // Charger les notifications
+            if (!notificationsLoaded) {
+                loadNotifications();
+            } else {
+                // Ajouter la notification dans le dropdown
+                addNotificationToDropdown(data, type);
+            }
+            
+            // Afficher le dropdown automatiquement pour 5 secondes
+            notificationDropdown.classList.remove('hidden');
+            
+            // Masquer après 5 secondes
+            setTimeout(() => {
+                if (!notificationDropdown.matches(':hover')) {
+                    notificationDropdown.classList.add('hidden');
+                }
+            }, 5000);
+        });
+        
+        // Ajouter une notification au dropdown
+        function addNotificationToDropdown(data, type) {
+            if (!notificationList) return;
+            
+            let icon = 'fa-bell';
+            let iconColor = 'text-gray-500';
+            let message = 'Nouvelle notification';
+            
+            // Déterminer le type d'icône et le message
+            if (type === 'like') {
+                icon = 'fa-heart';
+                iconColor = 'text-red-500';
+                message = `${data.author} a liké: ${data.title}`;
+            } else if (type === 'comment') {
+                icon = 'fa-comment';
+                iconColor = 'text-blue-500';
+                message = `${data.author}: ${data.content}`;
+            } else if (type === 'post') {
+                icon = 'fa-file-alt';
+                iconColor = 'text-green-500';
+                message = `${data.author} a publié: ${data.title}`;
+            }
+            
+            // Créer l'élément de notification
+            const notificationItem = document.createElement('div');
+            notificationItem.className = 'px-4 py-3 hover:bg-gray-100 border-b border-gray-100 bg-blue-50';
+            notificationItem.innerHTML = `
+                <div class="flex items-start">
+                    <div class="mr-3">
+                        <i class="fas ${icon} ${iconColor}"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm text-gray-800 font-medium">
+                            ${message}
+                        </p>
+                        <p class="text-xs text-gray-500 mt-1">
+                            ${new Date().toLocaleString()}
+                        </p>
+                    </div>
+                    <button class="mark-as-read-btn text-xs text-blue-500 hover:text-blue-700"
+                        data-id="new-notification">
+                        Marquer comme lu
+                    </button>
+                </div>
+            `;
+            
+            // Insérer au début de la liste
+            if (notificationList.firstChild) {
+                notificationList.insertBefore(notificationItem, notificationList.firstChild);
+            } else {
+                notificationList.appendChild(notificationItem);
+            }
+            
+            // Activer le bouton "marquer comme lu"
+            markAllContainer.classList.remove('hidden');
+            
+            // Ajouter un écouteur au bouton "marquer comme lu"
+            const markAsReadBtn = notificationItem.querySelector('.mark-as-read-btn');
+            markAsReadBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                notificationItem.classList.remove('bg-blue-50');
+                notificationItem.classList.add('bg-white');
+                this.remove();
+            });
+            
+            // Mettre à jour l'indicateur non lu
+            if (notificationIndicator) {
+                notificationIndicator.classList.remove('hidden');
+            }
+        }
+        
+        // Function to load notifications from the server
+        function loadNotifications() {
+            // Show loading indicator
+            notificationList.innerHTML = '<div class="px-4 py-3 text-center text-gray-500">Chargement...</div>';
+            
+            // Fetch notifications from the server
+            fetch('/notifications/get', {
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                displayNotifications(data);
+                notificationsLoaded = true;
+            })
+            .catch(error => {
+                console.error('Error fetching notifications:', error);
+                notificationList.innerHTML = `<div class="px-4 py-3 text-center text-red-500">Erreur de chargement: ${error.message}</div>`;
+            });
+        }
+        
+        // Display notifications in the dropdown
+        function displayNotifications(data) {
+            if (!data || data.length === 0) {
+                notificationList.innerHTML = '<div class="px-4 py-3 text-center text-gray-500">Pas de notifications</div>';
+                markAllContainer.classList.add('hidden');
+                return;
+            }
+            
+            let html = '';
+            data.forEach(notification => {
+                const isRead = notification.read_at !== null;
+                let notificationData;
+                
+                try {
+                    notificationData = typeof notification.data === 'string' 
+                        ? JSON.parse(notification.data) 
+                        : notification.data;
+                } catch (e) {
+                    console.error('Error parsing notification data:', e);
+                    notificationData = { message: 'Notification' };
+                }
+                
+                let icon = 'fas fa-bell';
+                let bgColor = isRead ? 'bg-white' : 'bg-blue-50';
+                
+                // Determine icon based on notification type
+                if (notification.type.includes('LikeNotification')) {
+                    icon = 'fas fa-heart text-red-500';
+                } else if (notification.type.includes('CommentNotification') || notification.type.includes('commentNotification')) {
+                    icon = 'fas fa-comment text-blue-500';
+                } else if (notification.type.includes('PostCreatedNotification')) {
+                    icon = 'fas fa-file-alt text-green-500';
+                }
+                
+                html += `
+                <div class="px-4 py-3 hover:bg-gray-100 border-b border-gray-100 ${bgColor}" 
+                     data-notification-id="${notification.id}">
+                    <div class="flex items-start">
+                        <div class="mr-3">
+                            <i class="${icon}"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-800 font-medium">
+                                ${notificationData.message || 'Nouvelle notification'}
+                            </p>
+                            <p class="text-xs text-gray-500 mt-1">
+                                ${new Date(notification.created_at).toLocaleString()}
+                            </p>
+                        </div>
+                        ${!isRead ? 
+                            `<button class="mark-as-read-btn text-xs text-blue-500 hover:text-blue-700"
+                                data-id="${notification.id}">
+                                Marquer comme lu
+                            </button>` : ''
+                        }
+                    </div>
+                </div>`;
+            });
+            
+            notificationList.innerHTML = html;
+            
+            // Show mark all as read button if there are unread notifications
+            const hasUnread = data.some(notification => notification.read_at === null);
+            if (hasUnread) {
+                markAllContainer.classList.remove('hidden');
+            } else {
+                markAllContainer.classList.add('hidden');
+            }
+            
+            // Add event listeners to mark as read buttons
+            document.querySelectorAll('.mark-as-read-btn').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const id = this.getAttribute('data-id');
+                    markAsRead(id);
+                });
+            });
+            
+            // Make notification items clickable to view details
+            document.querySelectorAll('[data-notification-id]').forEach(item => {
+                item.addEventListener('click', function() {
+                    const id = this.getAttribute('data-notification-id');
+                    markAsRead(id);
+                    // Add logic to redirect to the relevant page based on notification type
+                });
+            });
+        }
+        
+        // Mark a notification as read
+        function markAsRead(id) {
+            fetch(`/notifications/mark-as-read/${id}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Reload notifications to update the UI
+                    loadNotifications();
+                    
+                    // Update unread indicator
+                    updateUnreadIndicator();
+                }
+            })
+            .catch(error => console.error('Error marking notification as read:', error));
+        }
+        
+        // Mark all notifications as read
+        if (markAllReadButton) {
+            markAllReadButton.addEventListener('click', function() {
+                fetch('/notifications/mark-all-as-read', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'same-origin'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Reload notifications to update the UI
+                        loadNotifications();
+                        
+                        // Update unread indicator
+                        if (notificationIndicator) {
+                            notificationIndicator.classList.add('hidden');
+                        }
+                    }
+                })
+                .catch(error => console.error('Error marking all notifications as read:', error));
+            });
+        }
+        
+        // Update unread indicator
+        function updateUnreadIndicator() {
+            fetch('/notifications/count', {
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.count > 0) {
+                    if (notificationIndicator) {
+                        notificationIndicator.classList.remove('hidden');
+                    }
+                } else {
+                    if (notificationIndicator) {
+                        notificationIndicator.classList.add('hidden');
+                    }
+                }
+            })
+            .catch(error => console.error('Error getting notification count:', error));
+        }
+        
+        // Listen for new pusher notifications
+        ['test.notification', 'like.notification', 'comment.notification'].forEach(event => {
+            document.addEventListener(event, updateNotificationsOnPush);
+        });
+        
+        // Update notification data when new notifications are received
+        function updateNotificationsOnPush() {
+            notificationsLoaded = false; // Reset so it will reload next time opened
+            updateUnreadIndicator();
         }
     });
-});
 </script>

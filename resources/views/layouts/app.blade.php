@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
-    <style>
+    <!-- <style>
         [x-cloak] { display: none !important; }
         
         /* Notification Styles */
@@ -35,7 +35,7 @@
             flex-direction: row;
             align-items: center;
         }
-    </style>
+    </style> -->
     
     @vite('resources/css/app.css')
     <!-- Scripts -->

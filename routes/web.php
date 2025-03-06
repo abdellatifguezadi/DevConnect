@@ -7,6 +7,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ConnectionController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TweetController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -63,6 +64,22 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/search/users', [SearchController::class, 'searchUsers'])->name('search.users');
     Route::get('/hashtags/{hashtag}', [SearchController::class, 'showHashtag'])->name('hashtags.show');
     Route::get('/languages/{language}', [SearchController::class, 'showLanguage'])->name('languages.show');
+
+    // Ajouter routes pour les notifications
+    Route::get('/notifications/get', [NotificationController::class, 'getNotifications']);
+    Route::post('/notifications/mark-as-read/{id}', [NotificationController::class, 'markAsRead']);
+    Route::post('/notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead']);
+    Route::get('/notifications/count', [NotificationController::class, 'getUnreadCount']);
+    
+    // // Route de test pour les notifications
+    // Route::get('/test-notification', function() {
+    //     $user = auth()->user();
+    //     if (!$user) return redirect()->back();
+        
+    //     // Envoyer une notification de test
+    //     event(new \App\Events\TestNotification($user));
+    //     return redirect()->back()->with('success', 'Notification de test envoyée!');
+    // })->name('test-notification');
 });
 
 require __DIR__ . '/auth.php';
