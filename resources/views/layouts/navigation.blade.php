@@ -499,23 +499,13 @@
         document.addEventListener('notification.received', function(event) {
             const { type, data } = event.detail;
             
-            // Charger les notifications
-            if (!notificationsLoaded) {
-                loadNotifications();
-            } else {
-                // Ajouter la notification dans le dropdown
-                addNotificationToDropdown(data, type);
+            // Mettre à jour uniquement l'indicateur non lu
+            if (notificationIndicator) {
+                notificationIndicator.classList.remove('hidden');
             }
             
-            // Afficher le dropdown automatiquement pour 5 secondes
-            notificationDropdown.classList.remove('hidden');
-            
-            // Masquer après 5 secondes
-            setTimeout(() => {
-                if (!notificationDropdown.matches(':hover')) {
-                    notificationDropdown.classList.add('hidden');
-                }
-            }, 5000);
+            // Marquer les notifications comme non chargées pour le prochain clic
+            notificationsLoaded = false;
         });
         
         // Ajouter une notification au dropdown
@@ -783,15 +773,15 @@
             .catch(error => console.error('Error getting notification count:', error));
         }
         
+        // Appeler updateUnreadIndicator au chargement de la page
+        updateUnreadIndicator();
+        
         // Listen for new pusher notifications
         ['test.notification', 'like.notification', 'comment.notification'].forEach(event => {
-            document.addEventListener(event, updateNotificationsOnPush);
+            document.addEventListener(event, function() {
+                updateUnreadIndicator();
+                notificationsLoaded = false;
+            });
         });
-        
-        // Update notification data when new notifications are received
-        function updateNotificationsOnPush() {
-            notificationsLoaded = false; // Reset so it will reload next time opened
-            updateUnreadIndicator();
-        }
     });
 </script>
