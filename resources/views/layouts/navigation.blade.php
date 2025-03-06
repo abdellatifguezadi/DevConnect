@@ -416,13 +416,10 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Le modal lui-même
     const modal = document.getElementById('create-post-modal');
-    // Boutons pour fermer le modal
     const closeBtn = document.getElementById('close-create-post-btn');
     const closeBtnX = document.getElementById('close-create-post-btn-x');
 
-    // Fonction pour fermer le modal
     function closeModal() {
         modal.classList.add('hidden');
         document.body.classList.remove('overflow-hidden');
@@ -436,7 +433,6 @@ document.addEventListener('DOMContentLoaded', function() {
         closeBtnX.addEventListener('click', closeModal);
     }
 
-    // Fermer le modal en cliquant à l'extérieur
     modal.addEventListener('click', function(event) {
         if (event.target === modal) {
             closeModal();
