@@ -61,7 +61,7 @@
                     ->count();
                     @endphp
                     @if($pendingConnections > 0)
-                    <span class="absolute -top-1 -right-1 bg-red-500 rounded-full w-2 h-2"></span>
+                    <!-- <span class="absolute -top-1 -right-1 bg-red-500 rounded-full w-2 h-2"></span> -->
                     @endif
                 </a>
 

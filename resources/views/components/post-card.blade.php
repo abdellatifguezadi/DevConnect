@@ -44,6 +44,7 @@
                     </form>
                     <form action="{{ route('connections.reject', $connectionStatus) }}" method="POST">
                         @csrf
+                        @method('DELETE')
                         <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition duration-200">
                             Refuser
                         </button>
@@ -60,7 +61,7 @@
                         </svg>
                     </button>
                     <div id="dropdown-menu-{{ $post->id }}" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 hidden">
-                        <button onclick="openEditPost('{{ $post->id }}', '{{ addslashes($post->content) }}', '{{ $post->language->name ?? '' }}', '{{ addslashes($post->code_snippet ?? '') }}')"
+                        <button onclick="openEditPost('{{ $post->id }}', '{{ addslashes($post->content) }}', '{{ $post->language->name }}', '{{ addslashes($post->code_snippet ) , }}')"
                             class="block w-full text-left px-4 py-2 text-blue-600 hover:bg-gray-100">
                             Modifier
                         </button>
