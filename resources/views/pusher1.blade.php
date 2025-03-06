@@ -34,12 +34,10 @@
     <script>
         Pusher.logToConsole = true;
 
-        var pusher = new Pusher('{{ env('
-            PUSHER_APP_KEY ') }}', {
-                cluster: '{{ env('
-                PUSHER_APP_CLUSTER ') }}',
-                encrypted: true
-            });
+        var pusher = new Pusher('{{ env('PUSHER_APP_KEY') }}', {
+cluster: '{{ env('PUSHER_APP_CLUSTER') }}',
+encrypted: true
+});
 
         var channel = pusher.subscribe('notification');
         channel.bind('test.notification', function(data) {
