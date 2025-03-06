@@ -4,11 +4,11 @@
             <!-- Logo et Recherche -->
             <div class="flex items-center space-x-4">
                 <a href="{{ route('dashboard') }}" class="text-2xl font-bold text-blue-400">&lt;DevConnect/&gt;</a>
-                <div class="relative">
+                <div class="relative hidden md:block">
                     <input type="text"
                         id="search-input"
                         placeholder="Rechercher des développeurs, des posts..."
-                        class="bg-gray-800 pl-10 pr-4 py-2 rounded-lg w-96 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-gray-700 transition-all duration-200">
+                        class="bg-gray-800 pl-10 pr-4 py-2 rounded-lg w-64 lg:w-96 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-gray-700 transition-all duration-200">
                     <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
@@ -18,8 +18,15 @@
                 </div>
             </div>
 
-            <!-- Menu de Navigation -->
-            <div class="flex items-center space-x-6">
+            <!-- Menu Hamburger pour mobile -->
+            <button class="md:hidden text-gray-400 hover:text-white focus:outline-none" id="mobile-menu-button">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+
+            <!-- Menu de Navigation - Desktop -->
+            <div class="hidden md:flex items-center space-x-6">
                 <!-- Accueil -->
                 <a href="{{ route('dashboard') }}" class="flex items-center space-x-1 hover:text-blue-400" title="Accueil">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -66,12 +73,6 @@
                     <span class="absolute -top-1 -right-1 bg-red-500 rounded-full w-2 h-2"></span>
                 </a>
 
-                <!-- Nouveau Post -->
-                <button id="open-create-post-btn" 
-                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors duration-200">
-                    Nouveau Post
-                </button>
-
                 <!-- Profile Dropdown -->
                 <div class="relative dropdown-container" id="dropdown-profile">
                     <button onclick="toggleProfileDropdown()" class="flex items-center space-x-2">
@@ -101,66 +102,147 @@
             </div>
         </div>
     </div>
+
+    <!-- Menu Mobile -->
+    <div class="md:hidden hidden bg-gray-800" id="mobile-menu">
+        <div class="px-2 pt-2 pb-3 space-y-1">
+            <!-- Barre de recherche mobile -->
+            <div class="relative px-3 py-2">
+                <input type="text"
+                    id="mobile-search-input"
+                    placeholder="Rechercher..."
+                    class="bg-gray-700 pl-10 pr-4 py-2 rounded-lg w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <svg class="w-5 h-5 text-gray-400 absolute left-6 top-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <div id="mobile-search-results" class="absolute mt-1 w-full bg-white rounded-lg shadow-lg z-50 overflow-hidden hidden left-0"></div>
+            </div>
+            
+            <a href="{{ route('dashboard') }}" class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md">
+                Accueil
+            </a>
+            <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md">
+                Messages
+            </a>
+            <a href="{{ route('connections.index') }}" class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md">
+                Mes connexions
+            </a>
+            <a href="{{ route('connections.pending') }}" class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md">
+                Demandes de connexion
+                @if($pendingConnections > 0)
+                <span class="inline-block ml-2 w-2 h-2 bg-red-500 rounded-full"></span>
+                @endif
+            </a>
+            <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md">
+                Notifications
+            </a>
+            <a href="{{ route('profile.show', ['user' => auth()->id()]) }}" class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md">
+                Mon Profil
+            </a>
+            <form method="POST" action="{{ route('logout') }}" class="block">
+                @csrf
+                <button type="submit" class="text-gray-300 hover:bg-gray-700 hover:text-white block w-full text-left px-3 py-2 rounded-md">
+                    Se déconnecter
+                </button>
+            </form>
+        </div>
+    </div>
 </nav>
 
 <script>
-
     document.addEventListener('DOMContentLoaded', function() {
+        // Mobile menu toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        if (mobileMenuButton && mobileMenu) {
+            mobileMenuButton.addEventListener('click', function() {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+
         const searchInput = document.getElementById('search-input');
         const searchResults = document.getElementById('search-results');
+        const mobileSearchInput = document.getElementById('mobile-search-input');
+        const mobileSearchResults = document.getElementById('mobile-search-results');
         let searchTimeout;
 
-        searchInput.addEventListener('input', function() {
-            clearTimeout(searchTimeout);
+        // Desktop search functionality
+        if (searchInput && searchResults) {
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
 
-            const query = this.value.trim();
+                const query = this.value.trim();
 
-            if (query === '') {
-                searchResults.innerHTML = '';
-                searchResults.classList.add('hidden');
-                return;
-            }
+                if (query === '') {
+                    searchResults.innerHTML = '';
+                    searchResults.classList.add('hidden');
+                    return;
+                }
 
+                searchTimeout = setTimeout(() => {
+                    fetchSearchResults(query, searchResults);
+                }, 300);
+            });
 
-            searchTimeout = setTimeout(() => {
-                fetchSearchResults(query);
-            }, 300);
-        });
+            document.addEventListener('click', function(e) {
+                if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                    searchResults.classList.add('hidden');
+                }
+            });
+        }
 
-        document.addEventListener('click', function(e) {
-            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
-                searchResults.classList.add('hidden');
-            }
-        });
+        // Mobile search functionality
+        if (mobileSearchInput && mobileSearchResults) {
+            mobileSearchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
 
-        function fetchSearchResults(query) {
+                const query = this.value.trim();
+
+                if (query === '') {
+                    mobileSearchResults.innerHTML = '';
+                    mobileSearchResults.classList.add('hidden');
+                    return;
+                }
+
+                searchTimeout = setTimeout(() => {
+                    fetchSearchResults(query, mobileSearchResults);
+                }, 300);
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!mobileSearchInput.contains(e.target) && !mobileSearchResults.contains(e.target)) {
+                    mobileSearchResults.classList.add('hidden');
+                }
+            });
+        }
+
+        function fetchSearchResults(query, resultsElement) {
             if (query.length < 2) return;
 
             fetch(`/search/users?query=${encodeURIComponent(query)}`)
                 .then(response => response.json())
                 .then(data => {
-  
-                    displaySearchResults(data.users, data.hashtags || [] , data.languages || []);
+                    displaySearchResults(data.users, data.hashtags || [], data.languages || [], resultsElement);
                 })
                 .catch(error => console.error('Erreur:', error));
         }
 
-        function displaySearchResults(users, hashtags , languages) {
-            searchResults.innerHTML = '';
+        function displaySearchResults(users, hashtags, languages, resultsElement) {
+            resultsElement.innerHTML = '';
 
             if (!users) users = [];
             if (!hashtags) hashtags = [];
             if (!languages) languages = [];
 
             if (users.length === 0 && hashtags.length === 0 && languages.length === 0) {
-                searchResults.innerHTML = '<div class="px-4 py-3 text-gray-500">Aucun résultat trouvé</div>';
-                searchResults.classList.remove('hidden');
+                resultsElement.innerHTML = '<div class="px-4 py-3 text-gray-500">Aucun résultat trouvé</div>';
+                resultsElement.classList.remove('hidden');
                 return;
             }
 
             const resultsList = document.createElement('div');
             resultsList.className = 'max-h-[70vh] overflow-y-auto';
-
 
             if (hashtags && hashtags.length > 0) {
                 const hashtagsSection = document.createElement('div');
@@ -199,8 +281,7 @@
                     languageElement.className = 'flex items-center px-4 py-3 hover:bg-gray-100 border-b border-gray-100';
 
                     languageElement.innerHTML = `
-                        <div class="flex items
-                        -center">
+                        <div class="flex items-center">
                             <div>
                                 <div class="font-medium text-gray-900">${language.name}</div>
                                 <div class="text-sm text-gray-500">${language.posts_count} publication${language.posts_count > 1 ? 's' : ''}</div>
@@ -239,8 +320,8 @@
                 });
             }
 
-            searchResults.appendChild(resultsList);
-            searchResults.classList.remove('hidden');
+            resultsElement.appendChild(resultsList);
+            resultsElement.classList.remove('hidden');
         }
     });
 
@@ -335,38 +416,16 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Bouton pour ouvrir le modal
-    const openBtn = document.getElementById('open-create-post-btn');
-    // Boutons avec classe pour ouvrir le modal
-    const openBtns = document.querySelectorAll('.open-create-post-btn');
+    // Le modal lui-même
+    const modal = document.getElementById('create-post-modal');
     // Boutons pour fermer le modal
     const closeBtn = document.getElementById('close-create-post-btn');
     const closeBtnX = document.getElementById('close-create-post-btn-x');
-    // Le modal lui-même
-    const modal = document.getElementById('create-post-modal');
-
-    // Fonction pour ouvrir le modal
-    function openModal() {
-        modal.classList.remove('hidden');
-        document.body.classList.add('overflow-hidden');
-    }
 
     // Fonction pour fermer le modal
     function closeModal() {
         modal.classList.add('hidden');
         document.body.classList.remove('overflow-hidden');
-    }
-
-    // Ajouter les événements click
-    if (openBtn) {
-        openBtn.addEventListener('click', openModal);
-    }
-    
-    // Ajouter les événements click pour tous les boutons avec la classe
-    if (openBtns.length > 0) {
-        openBtns.forEach(btn => {
-            btn.addEventListener('click', openModal);
-        });
     }
 
     if (closeBtn) {
