@@ -14,8 +14,8 @@
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
     
     <!-- Toastr & Font Awesome for notifications -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
+   
     
     <!-- Styles pour Laravel Share -->
     <style>
@@ -116,42 +116,7 @@
     <!-- Pusher Notifications -->
     <script src="{{ asset('js/pusher-notifications.js') }}" defer></script>
     
-    <!-- Script pour le partage social -->
-    <script>
-        // Fonction pour afficher/masquer le dropdown de partage
-        function toggleShareDropdown(postId) {
-            console.log('toggleShareDropdown appelé pour le post ID:', postId);
-            const dropdown = document.getElementById(`share-dropdown-${postId}`);
-            console.log('Dropdown element:', dropdown);
-            
-            // Fermer tous les autres dropdowns ouverts
-            document.querySelectorAll('.dropdown-container div[id^="share-dropdown-"]').forEach(el => {
-                if (el.id !== `share-dropdown-${postId}`) {
-                    el.classList.add('hidden');
-                }
-            });
-            
-            // Basculer la visibilité du dropdown actuel
-            dropdown.classList.toggle('hidden');
-            console.log('Dropdown visible:', !dropdown.classList.contains('hidden'));
-        }
 
-        // Fermer les dropdowns de partage si on clique ailleurs sur la page
-        document.addEventListener('click', function(event) {
-            const target = event.target;
-            
-            // Ne rien faire si on clique sur un bouton de partage ou dans un dropdown
-            if (target.closest('button[onclick^="toggleShareDropdown"]') || 
-                target.closest('div[id^="share-dropdown-"]')) {
-                return;
-            }
-            
-            // Fermer tous les dropdowns ouverts
-            document.querySelectorAll('div[id^="share-dropdown-"]').forEach(dropdown => {
-                dropdown.classList.add('hidden');
-            });
-        });
-    </script>
     
     @stack('scripts')
 </body>

@@ -163,6 +163,7 @@
                                                         d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                 </svg>
                                             </button>
+                                        </form>
                                     </div>
                                     @endif
                                 </div>
@@ -224,7 +225,7 @@
                                         <span class="like-count">{{ $post->likes_count }}</span>
                                     </button>
 
-                                    <button class="flex items-center space-x-1 text-gray-500 hover:text-blue-500" onclick="document.getElementById('comments-{{ $post->id }}').classList.toggle('hidden')">
+                                    <button type="button" class="flex items-center space-x-1 text-gray-500 hover:text-blue-500" onclick="document.getElementById('comments-{{ $post->id }}').classList.toggle('hidden')">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round"
                                                 stroke-linejoin="round"
@@ -350,28 +351,13 @@
     </div>
 
     <script>
-        function toggleEditComment(commentId) {
-            const editComment = document.getElementById(`edit-comment-${commentId}`);
-            if (editComment.style.display === "none" || editComment.style.display === "") {
-                editComment.style.display = "block";
-            } else {
-                editComment.style.display = "none";
-            }
-        }
+
 
         function openEditPost(postId, content, language, codeSnippet) {
-            console.log('Opening edit modal for post:', postId);
             const modal = document.getElementById('editPostModal');
-            if (!modal) {
-                console.error('Edit post modal not found!');
-                return;
-            }
             
             const form = document.getElementById('editPostForm');
-            if (!form) {
-                console.error('Edit post form not found!');
-                return;
-            }
+
             
             const contentTextarea = document.getElementById('editPostContent');
             const languageInput = document.getElementById('editPostLanguage');
@@ -391,8 +377,7 @@
                 codeSnippetTextarea.value = codeSnippet || '';
             }
 
-            modal.classList.remove('hidden');
-            console.log('Modal opened successfully');
+            modal.classList.remove('hidden');;
         }
 
         function closeEditPost() {
@@ -410,30 +395,6 @@
             modal.classList.add('hidden');
         }
 
-        function toggleDropdown(postId) {
-            const dropdownMenu = document.getElementById(`dropdown-menu-${postId}`);
-            if (dropdownMenu) {
-                dropdownMenu.classList.toggle('hidden');
-                
-                // Close other open dropdowns
-                document.querySelectorAll('.dropdown-container').forEach(container => {
-                    if (container.id !== `dropdown-${postId}`) {
-                        const menu = container.querySelector('div[id^="dropdown-menu-"]');
-                        if (menu && !menu.classList.contains('hidden')) {
-                            menu.classList.add('hidden');
-                        }
-                    }
-                });
-                
-                // Close this dropdown when clicking outside
-                document.addEventListener('click', function closeDropdown(event) {
-                    const container = document.getElementById(`dropdown-${postId}`);
-                    if (container && !container.contains(event.target)) {
-                        dropdownMenu.classList.add('hidden');
-                        document.removeEventListener('click', closeDropdown);
-                    }
-                });
-            }
-        }
+
     </script>
 </x-app-layout>

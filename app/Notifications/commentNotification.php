@@ -56,6 +56,5 @@ class commentNotification extends Notification
 
     public function via($notifiable)
     {
-        return ['database', 'broadcast']; // Save to database and broadcast in real-time
-    }
+        return ['database', 'broadcast']; 
 }

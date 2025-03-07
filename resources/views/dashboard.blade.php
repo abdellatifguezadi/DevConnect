@@ -134,14 +134,7 @@
 @endif
 
 <script>
-    function toggleEditComment(commentId) {
-        const editComment = document.getElementById(`edit-comment-${commentId}`);
-        if (editComment.style.display === "none" || editComment.style.display === "") {
-            editComment.style.display = "block";
-        } else {
-            editComment.style.display = "none";
-        }
-    }
+
 
     function openEditPost(postId, content, language, codeSnippet, imageUrl, videoUrl) {
         console.log('Opening edit modal for post:', postId);
@@ -179,7 +172,7 @@
             codeSnippetTextarea.value = codeSnippet || '';
         }
 
-        // Handle image preview
+
         if (currentImage && currentImagePreview) {
             if (imageUrl && imageUrl !== 'undefined' && imageUrl !== 'null') {
                 currentImage.src = imageUrl;
@@ -189,7 +182,6 @@
             }
         }
 
-        // Handle video preview
         if (currentVideo && currentVideoPreview) {
             if (videoUrl && videoUrl !== 'undefined' && videoUrl !== 'null') {
                 currentVideo.src = videoUrl;
@@ -208,39 +200,35 @@
         modal.classList.add('hidden');
     }
     
-    function toggleDropdown(postId) {
-        const dropdownMenu = document.getElementById(`dropdown-menu-${postId}`);
-        if (dropdownMenu) {
-            dropdownMenu.classList.toggle('hidden');
-            
-            // Close other open dropdowns
-            document.querySelectorAll('.dropdown-container').forEach(container => {
-                if (container.id !== `dropdown-${postId}`) {
-                    const menu = container.querySelector('div[id^="dropdown-menu-"]');
-                    if (menu && !menu.classList.contains('hidden')) {
-                        menu.classList.add('hidden');
-                    }
-                }
-            });
-            
-            // Close this dropdown when clicking outside
-            document.addEventListener('click', function closeDropdown(event) {
-                const container = document.getElementById(`dropdown-${postId}`);
-                if (container && !container.contains(event.target)) {
-                    dropdownMenu.classList.add('hidden');
-                    document.removeEventListener('click', closeDropdown);
-                }
-            });
-        }
-    }
+    // function toggleDropdown(postId) {
+    //     const dropdownMenu = document.getElementById(`dropdown-menu-${postId}`);
+    //     if (dropdownMenu) {
+    //         dropdownMenu.classList.toggle('hidden');
 
-    // Add new function to handle create post form
+    //         document.querySelectorAll('.dropdown-container').forEach(container => {
+    //             if (container.id !== `dropdown-${postId}`) {
+    //                 const menu = container.querySelector('div[id^="dropdown-menu-"]');
+    //                 if (menu && !menu.classList.contains('hidden')) {
+    //                     menu.classList.add('hidden');
+    //                 }
+    //             }
+    //         });
+
+    //         document.addEventListener('click', function closeDropdown(event) {
+    //             const container = document.getElementById(`dropdown-${postId}`);
+    //             if (container && !container.contains(event.target)) {
+    //                 dropdownMenu.classList.add('hidden');
+    //                 document.removeEventListener('click', closeDropdown);
+    //             }
+    //         });
+    //     }
+    // }
+
     document.addEventListener('DOMContentLoaded', function() {
-        // Get all buttons with class 'open-create-post-btn'
+   
         const createPostButtons = document.querySelectorAll('.open-create-post-btn');
         const createPostModal = document.getElementById('createPostModal');
 
-        // Add click event to all create post buttons
         createPostButtons.forEach(button => {
             button.addEventListener('click', function() {
                 if (createPostModal) {
@@ -249,7 +237,6 @@
             });
         });
 
-        // Close modal when clicking outside
         if (createPostModal) {
             createPostModal.addEventListener('click', function(e) {
                 if (e.target === createPostModal) {
@@ -258,7 +245,6 @@
             });
         }
 
-        // Close modal when pressing Escape key
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && createPostModal) {
                 createPostModal.classList.add('hidden');
@@ -327,39 +313,5 @@
         </div>
     </div>
 </div>
-@push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const loadMoreButton = document.getElementById('load-more');
-        const postsContainer = document.getElementById('posts-container');
-        const loading = document.getElementById('loading');
 
-        if (loadMoreButton) {
-            loadMoreButton.addEventListener('click', function() {
-                loadMoreButton.classList.add('hidden');
-                loading.classList.remove('hidden');
-
-                const nextPage = loadMoreButton.dataset.nextPage;
-
-                fetch(`/posts?page=${nextPage}`, {
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        postsContainer.insertAdjacentHTML('beforeend', data.html);
-                        loading.classList.add('hidden');
-
-                        if (data.hasMorePages) {
-                            loadMoreButton.dataset.nextPage = parseInt(nextPage) + 1;
-                            loadMoreButton.classList.remove('hidden');
-                        } else {
-                            loadMoreButton.remove();
-                        }
-                    });
-            });
-        }
-    });
-</script>@endpush
 
