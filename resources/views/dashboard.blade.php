@@ -134,14 +134,7 @@
 @endif
 
 <script>
-    function toggleEditComment(commentId) {
-        const editComment = document.getElementById(`edit-comment-${commentId}`);
-        if (editComment.style.display === "none" || editComment.style.display === "") {
-            editComment.style.display = "block";
-        } else {
-            editComment.style.display = "none";
-        }
-    }
+
 
     function openEditPost(postId, content, language, codeSnippet, imageUrl, videoUrl) {
         console.log('Opening edit modal for post:', postId);
@@ -179,7 +172,7 @@
             codeSnippetTextarea.value = codeSnippet || '';
         }
 
-        // Handle image preview
+
         if (currentImage && currentImagePreview) {
             if (imageUrl && imageUrl !== 'undefined' && imageUrl !== 'null') {
                 currentImage.src = imageUrl;
@@ -189,7 +182,6 @@
             }
         }
 
-        // Handle video preview
         if (currentVideo && currentVideoPreview) {
             if (videoUrl && videoUrl !== 'undefined' && videoUrl !== 'null') {
                 currentVideo.src = videoUrl;
@@ -208,34 +200,105 @@
         modal.classList.add('hidden');
     }
     
-    function toggleDropdown(postId) {
-        const dropdownMenu = document.getElementById(`dropdown-menu-${postId}`);
-        if (dropdownMenu) {
-            dropdownMenu.classList.toggle('hidden');
-            
-            // Close other open dropdowns
-            document.querySelectorAll('.dropdown-container').forEach(container => {
-                if (container.id !== `dropdown-${postId}`) {
-                    const menu = container.querySelector('div[id^="dropdown-menu-"]');
-                    if (menu && !menu.classList.contains('hidden')) {
-                        menu.classList.add('hidden');
-                    }
+    // function toggleDropdown(postId) {
+    //     const dropdownMenu = document.getElementById(`dropdown-menu-${postId}`);
+    //     if (dropdownMenu) {
+    //         dropdownMenu.classList.toggle('hidden');
+
+    //         document.querySelectorAll('.dropdown-container').forEach(container => {
+    //             if (container.id !== `dropdown-${postId}`) {
+    //                 const menu = container.querySelector('div[id^="dropdown-menu-"]');
+    //                 if (menu && !menu.classList.contains('hidden')) {
+    //                     menu.classList.add('hidden');
+    //                 }
+    //             }
+    //         });
+
+    //         document.addEventListener('click', function closeDropdown(event) {
+    //             const container = document.getElementById(`dropdown-${postId}`);
+    //             if (container && !container.contains(event.target)) {
+    //                 dropdownMenu.classList.add('hidden');
+    //                 document.removeEventListener('click', closeDropdown);
+    //             }
+    //         });
+    //     }
+    // }
+
+    document.addEventListener('DOMContentLoaded', function() {
+   
+        const createPostButtons = document.querySelectorAll('.open-create-post-btn');
+        const createPostModal = document.getElementById('createPostModal');
+
+        createPostButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                if (createPostModal) {
+                    createPostModal.classList.remove('hidden');
                 }
             });
-            
-            // Close this dropdown when clicking outside
-            document.addEventListener('click', function closeDropdown(event) {
-                const container = document.getElementById(`dropdown-${postId}`);
-                if (container && !container.contains(event.target)) {
-                    dropdownMenu.classList.add('hidden');
-                    document.removeEventListener('click', closeDropdown);
+        });
+
+        if (createPostModal) {
+            createPostModal.addEventListener('click', function(e) {
+                if (e.target === createPostModal) {
+                    createPostModal.classList.add('hidden');
                 }
             });
         }
-    }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && createPostModal) {
+                createPostModal.classList.add('hidden');
+            }
+        });
+    });
 </script>
 
-<!-- Le modal de création de post a été déplacé vers layouts/navigation.blade.php -->
+<!-- Create Post Modal -->
+<div id="createPostModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto z-50">
+    <div class="relative min-h-screen flex items-center justify-center p-4">
+        <div class="relative bg-white w-full max-w-md rounded-2xl shadow-xl p-8">
+            <h3 class="text-2xl font-bold text-gray-900 mb-6">Créer une publication</h3>
+            <button onclick="document.getElementById('createPostModal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 transition-colors">
+                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            
+            <form action="{{ route('posts.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+                @csrf
+                <div>
+                    <textarea name="content" rows="4" class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200" placeholder="Que voulez-vous partager ?"></textarea>
+                </div>
+
+                <div>
+                    <input type="text" name="language" class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200" placeholder="Langage de programmation (optionnel)">
+                </div>
+
+                <div>
+                    <textarea name="code_snippet" rows="4" class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200" placeholder="Ajouter un extrait de code (optionnel)"></textarea>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Image</label>
+                        <input type="file" name="images[]" accept="image/*" class="mt-1" multiple>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Vidéo</label>
+                        <input type="file" name="videos[]" accept="video/*" class="mt-1" multiple>
+                    </div>
+                </div>
+
+                <div class="flex justify-end">
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                        Publier
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <div id="editPostModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto z-50">
     <div class="relative min-h-screen flex items-center justify-center p-4">
@@ -251,39 +314,4 @@
     </div>
 </div>
 
-@push('scripts')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const loadMoreButton = document.getElementById('load-more');
-        const postsContainer = document.getElementById('posts-container');
-        const loading = document.getElementById('loading');
 
-        if (loadMoreButton) {
-            loadMoreButton.addEventListener('click', function() {
-                loadMoreButton.classList.add('hidden');
-                loading.classList.remove('hidden');
-
-                const nextPage = loadMoreButton.dataset.nextPage;
-
-                fetch(`/posts?page=${nextPage}`, {
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        postsContainer.insertAdjacentHTML('beforeend', data.html);
-                        loading.classList.add('hidden');
-
-                        if (data.hasMorePages) {
-                            loadMoreButton.dataset.nextPage = parseInt(nextPage) + 1;
-                            loadMoreButton.classList.remove('hidden');
-                        } else {
-                            loadMoreButton.remove();
-                        }
-                    });
-            });
-        }
-    });
-</script>
-@endpush

@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\LikeNotification;
 use App\Models\Post;
+use App\Models\User;
+use App\Notifications\LikeNotification as NotificationsLikeNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class LikeController extends Controller
 {
@@ -22,6 +26,20 @@ class LikeController extends Controller
                 ]);
                 $post->increment('likes_count');
                 $isLiked = true;
+
+                if ($post->user_id != Auth::id()) {
+                    $postOwner = User::find($post->user_id);
+                    if ($postOwner) {
+                        $postOwner->notify(new NotificationsLikeNotification($post));
+                    }
+                    // Broadcast event
+                    event(new LikeNotification([
+                        'author' => auth()->user()->name,
+                        'title' => substr($post->content ?? 'Post', 0, 50),
+                        'message' => auth()->user()->name . ' a liké un post',
+                        'post_owner_id' => $post->user->id
+                    ]));
+                }
             }
 
             $post->refresh();
@@ -40,4 +58,4 @@ class LikeController extends Controller
             ], 500);
         }
     }
-} 
+}

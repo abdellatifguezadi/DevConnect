@@ -44,6 +44,7 @@
                     </form>
                     <form action="{{ route('connections.reject', $connectionStatus) }}" method="POST">
                         @csrf
+                        @method('DELETE')
                         <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition duration-200">
                             Refuser
                         </button>
@@ -60,7 +61,7 @@
                         </svg>
                     </button>
                     <div id="dropdown-menu-{{ $post->id }}" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 hidden">
-                        <button onclick="openEditPost('{{ $post->id }}', '{{ addslashes($post->content) }}', '{{ $post->language->name ?? '' }}', '{{ addslashes($post->code_snippet ?? '') }}')"
+                        <button onclick="openEditPost('{{ $post->id }}', '{{ addslashes($post->content) }}', '{{ $post->language->name }}', '{{ addslashes($post->code_snippet ) , }}')"
                             class="block w-full text-left px-4 py-2 text-blue-600 hover:bg-gray-100">
                             Modifier
                         </button>
@@ -144,6 +145,41 @@
                 </svg>
                 <span class="comment-count">{{ $post->comments_count }}</span>
             </button>
+            
+            <!-- Bouton Partager avec dropdown -->
+            <div class="relative dropdown-container">
+                <button onclick="toggleShareDropdown('{{ $post->id }}')" class="flex items-center space-x-1 text-gray-500 hover:text-blue-500 font-medium">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                            d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                    </svg>
+                    <span>Partager</span>
+                </button>
+                <div id="share-dropdown-{{ $post->id }}" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden">
+                    @php
+                        $shareTitle = "Découvrez ce post sur " . config('app.name') . ": " . substr($post->content, 0, 60) . "...";
+                        $shareUrl = route('posts.show', $post);
+                        $encodedShareUrl = urlencode($shareUrl);
+                        $encodedShareTitle = urlencode($shareTitle);
+                    @endphp
+                    
+                    <a href="https://www.facebook.com/sharer/sharer.php?u={{ $encodedShareUrl }}" class="social-button facebook" target="_blank">
+                        <i class="fab fa-facebook"></i> Facebook
+                    </a>
+                    <a href="https://twitter.com/intent/tweet?url={{ $encodedShareUrl }}&text={{ $encodedShareTitle }}" class="social-button twitter" target="_blank">
+                        <i class="fab fa-twitter"></i> Twitter
+                    </a>
+                    <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ $encodedShareUrl }}" class="social-button linkedin" target="_blank">
+                        <i class="fab fa-linkedin"></i> LinkedIn
+                    </a>
+                    <a href="https://wa.me/?text={{ $encodedShareTitle }}%20{{ $encodedShareUrl }}" class="social-button whatsapp" target="_blank">
+                        <i class="fab fa-whatsapp"></i> WhatsApp
+                    </a>
+                    <a href="https://telegram.me/share/url?url={{ $encodedShareUrl }}&text={{ $encodedShareTitle }}" class="social-button telegram" target="_blank">
+                        <i class="fab fa-telegram"></i> Telegram
+                    </a>
+                </div>
+            </div>
         </div>
 
         <!-- Comments Section -->
