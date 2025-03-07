@@ -49,6 +49,13 @@
                     </svg>
                 </a>
 
+                <!-- Offres d'emploi -->
+                <a href="{{ route('job-offers.index') }}" class="flex items-center space-x-1 hover:text-blue-400" title="Offres d'emploi">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                </a>
+
                 <!-- Demandes de connexion -->
                 <a href="{{ route('connections.pending') }}" class="flex items-center space-x-1 hover:text-blue-400 relative" title="Demandes de connexion">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -479,7 +486,7 @@
                 e.stopPropagation();
                 notificationDropdown.classList.toggle('hidden');
                 
-                // Load notifications when dropdown is opened and not already loaded
+                
                 if (!notificationDropdown.classList.contains('hidden') && !notificationsLoaded) {
                     loadNotifications();
                 }
@@ -499,12 +506,12 @@
         document.addEventListener('notification.received', function(event) {
             const { type, data } = event.detail;
             
-            // Mettre à jour uniquement l'indicateur non lu
+            
             if (notificationIndicator) {
                 notificationIndicator.classList.remove('hidden');
             }
             
-            // Marquer les notifications comme non chargées pour le prochain clic
+         
             notificationsLoaded = false;
         });
         
@@ -561,10 +568,10 @@
                 notificationList.appendChild(notificationItem);
             }
             
-            // Activer le bouton "marquer comme lu"
+            
             markAllContainer.classList.remove('hidden');
             
-            // Ajouter un écouteur au bouton "marquer comme lu"
+           
             const markAsReadBtn = notificationItem.querySelector('.mark-as-read-btn');
             markAsReadBtn.addEventListener('click', function(e) {
                 e.stopPropagation();
@@ -573,18 +580,17 @@
                 this.remove();
             });
             
-            // Mettre à jour l'indicateur non lu
+          
             if (notificationIndicator) {
                 notificationIndicator.classList.remove('hidden');
             }
         }
         
-        // Function to load notifications from the server
+       
         function loadNotifications() {
-            // Show loading indicator
+           
             notificationList.innerHTML = '<div class="px-4 py-3 text-center text-gray-500">Chargement...</div>';
-            
-            // Fetch notifications from the server
+
             fetch('/notifications/get', {
                 headers: {
                     'X-CSRF-TOKEN': csrfToken,
@@ -609,7 +615,7 @@
             });
         }
         
-        // Display notifications in the dropdown
+
         function displayNotifications(data) {
             if (!data || data.length === 0) {
                 notificationList.innerHTML = '<div class="px-4 py-3 text-center text-gray-500">Pas de notifications</div>';
@@ -633,8 +639,7 @@
                 
                 let icon = 'fas fa-bell';
                 let bgColor = isRead ? 'bg-white' : 'bg-blue-50';
-                
-                // Determine icon based on notification type
+
                 if (notification.type.includes('LikeNotification')) {
                     icon = 'fas fa-heart text-red-500';
                 } else if (notification.type.includes('CommentNotification') || notification.type.includes('commentNotification')) {
@@ -669,16 +674,14 @@
             });
             
             notificationList.innerHTML = html;
-            
-            // Show mark all as read button if there are unread notifications
+
             const hasUnread = data.some(notification => notification.read_at === null);
             if (hasUnread) {
                 markAllContainer.classList.remove('hidden');
             } else {
                 markAllContainer.classList.add('hidden');
             }
-            
-            // Add event listeners to mark as read buttons
+
             document.querySelectorAll('.mark-as-read-btn').forEach(button => {
                 button.addEventListener('click', function(e) {
                     e.stopPropagation();
@@ -686,13 +689,12 @@
                     markAsRead(id);
                 });
             });
-            
-            // Make notification items clickable to view details
+
             document.querySelectorAll('[data-notification-id]').forEach(item => {
                 item.addEventListener('click', function() {
                     const id = this.getAttribute('data-notification-id');
                     markAsRead(id);
-                    // Add logic to redirect to the relevant page based on notification type
+
                 });
             });
         }
@@ -711,17 +713,14 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Reload notifications to update the UI
                     loadNotifications();
-                    
-                    // Update unread indicator
+                
                     updateUnreadIndicator();
                 }
             })
             .catch(error => console.error('Error marking notification as read:', error));
         }
-        
-        // Mark all notifications as read
+
         if (markAllReadButton) {
             markAllReadButton.addEventListener('click', function() {
                 fetch('/notifications/mark-all-as-read', {
@@ -736,10 +735,9 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Reload notifications to update the UI
+
                         loadNotifications();
-                        
-                        // Update unread indicator
+
                         if (notificationIndicator) {
                             notificationIndicator.classList.add('hidden');
                         }
@@ -748,8 +746,7 @@
                 .catch(error => console.error('Error marking all notifications as read:', error));
             });
         }
-        
-        // Update unread indicator
+
         function updateUnreadIndicator() {
             fetch('/notifications/count', {
                 headers: {

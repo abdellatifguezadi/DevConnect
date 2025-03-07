@@ -8,6 +8,7 @@ use App\Http\Controllers\ConnectionController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TweetController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\JobOfferController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -81,6 +82,9 @@ Route::middleware(['auth'])->group(function () {
     //     event(new \App\Events\TestNotification($user));
     //     return redirect()->back()->with('success', 'Notification de test envoyée!');
     // })->name('test-notification');
+
+    // Routes pour les offres d'emploi
+    Route::resource('job-offers', JobOfferController::class);
 });
 
 require __DIR__ . '/auth.php';

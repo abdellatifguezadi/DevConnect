@@ -80,8 +80,20 @@ class User extends Authenticatable
 
     public function connections()
     {
-        return $this->sentConnections()->where('status', 'accepted')
-            ->union($this->receivedConnections()->where('status', 'accepted'));
+        return $this->sentConnections()
+            ->where('status', 'accepted')
+            ->get()
+            ->merge($this->receivedConnections()
+                ->where('status', 'accepted')
+                ->get());
+    }
+
+    /**
+     * Get job offers posted by the user
+     */
+    public function jobOffers()
+    {
+        return $this->hasMany(JobOffer::class);
     }
 
     // public function connectedUsers()
