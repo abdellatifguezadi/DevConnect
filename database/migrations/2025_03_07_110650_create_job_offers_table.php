@@ -18,13 +18,12 @@ return new class extends Migration
             $table->text('description');
             $table->string('company_name');
             $table->string('location');
-            $table->string('employment_type'); // Full-time, Part-time, Contract, etc.
+            $table->string('employment_type'); 
             $table->decimal('salary_min', 10, 2)->nullable();
             $table->decimal('salary_max', 10, 2)->nullable();
             $table->string('currency', 3)->default('EUR');
             $table->date('expiry_date')->nullable();
-            $table->string('status')->default('active'); // active, closed, filled
-            $table->string('experience_level')->nullable(); // junior, mid-level, senior
+            $table->string('experience_level')->nullable(); 
             $table->text('requirements')->nullable();
             $table->text('benefits')->nullable();
             $table->timestamps();
