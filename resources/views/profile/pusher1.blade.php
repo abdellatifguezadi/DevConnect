@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -62,4 +62,4 @@
     <h1>Pusher Test with Icons</h1>
     <p>Try publishing a new post to see the notification in action.</p>
 </body>
-</html>
+</html> -->

@@ -38,9 +38,7 @@ class PostController extends Controller
         return view('dashboard', compact('posts', 'trendingTags', 'user', 'postsCount', 'connectionsCount'));
     }
 
-    /**
-     * Load more posts for infinite scrolling
-     */
+
     public function loadMorePosts(Request $request)
     {
         $posts = Post::with(['user.profile', 'comments.user.profile', 'hashtags'])
@@ -203,99 +201,5 @@ class PostController extends Controller
         return back()->with('success', 'Post supprimé avec succès');
     }
 
-    // public function addComment(Request $request, Post $post)
-    // {
-    //     $request->validate([
-    //         'content' => 'required|max:1000',
-    //     ]);
 
-    //     $comment = $post->comments()->create([
-    //         'user_id' => auth()->id(),
-    //         'content' => $request->content,
-    //     ]);
-
-    //     $comment->load('user.profile');
-
-    //     $html = view('components.comment', ['comment' => $comment])->render();
-
-    //     return response()->json([
-    //         'success' => true,
-    //         'comment' => $comment,
-    //         'html' => $html
-    //     ]);
-    // }
-
-    // public function updateComment(Request $request, Comment $comment)
-    // {
-    //     if ($comment->user_id !== auth()->id()) {
-    //         return response()->json(['success' => false, 'message' => 'Non autorisé'], 403);
-    //     }
-
-    //     $request->validate([
-    //         'content' => 'required|max:1000',
-    //     ]);
-
-    //     $comment->update(['content' => $request->content]);
-    //     $comment->load('user.profile');
-
-    //     $html = view('components.comment', ['comment' => $comment])->render();
-
-    //     return response()->json([
-    //         'success' => true,
-    //         'comment' => $comment,
-    //         'html' => $html
-    //     ]);
-    // }
-
-    // public function deleteComment(Comment $comment)
-    // {
-    //     if ($comment->user_id !== auth()->id()) {
-    //         return response()->json(['success' => false, 'message' => 'Non autorisé'], 403);
-    //     }
-
-    //     $comment->delete();
-
-    //     return response()->json([
-    //         'success' => true,
-    //         'message' => 'Commentaire supprimé avec succès'
-    //     ]);
-    // }
-
-    // public function toggleLike(Post $post)
-    // {
-    //     $like = $post->likes()->where('user_id', auth()->id())->first();
-
-    //     if ($like) {
-    //         $like->delete();
-    //         $post->decrement('likes_count');
-    //         $message = 'Like retiré';
-    //     } else {
-    //         $post->likes()->create([
-    //             'user_id' => auth()->id()
-    //         ]);
-    //         $post->increment('likes_count');
-    //         $message = 'Post liké';
-    //     }
-
-    //     return back()->with('success', $message);
-    // }
-
-    // public function toggleCommentLike(Comment $comment)
-    // {
-    //     $like = $comment->likes()->where('user_id', auth()->id())->first();
-
-    //     if ($like) {
-    //         $like->delete();
-    //         $comment->decrement('likes_count');
-    //         $message = 'Like retiré';
-    //     } else {
-    //         $comment->likes()->create([
-    //             'user_id' => auth()->id()
-    //         ]);
-    //         $comment->increment('likes_count');
-    //         $message = 'Commentaire liké';
-    //     }
-
-    //     return back()->with('success', $message);
-    // }
 }

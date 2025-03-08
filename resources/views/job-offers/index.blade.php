@@ -57,38 +57,7 @@
                             </a>
                         </div>
                         
-                        <!-- Search & Filter Form -->
-                        <div class="p-4 border-b">
-                            <form action="{{ route('job-offers.index') }}" method="GET" class="flex flex-col md:flex-row gap-3">
-                                <div class="flex-grow">
-                                    <input type="text" name="search" placeholder="Rechercher un poste, une entreprise, un lieu..."
-                                        value="{{ request('search') }}"
-                                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-                                </div>
-                                <div class="flex gap-2">
-                                    <select name="experience_level" class="px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-                                        <option value="">Expérience</option>
-                                        <option value="Junior" {{ request('experience_level') == 'Junior' ? 'selected' : '' }}>Junior</option>
-                                        <option value="Mid-level" {{ request('experience_level') == 'Mid-level' ? 'selected' : '' }}>Intermédiaire</option>
-                                        <option value="Senior" {{ request('experience_level') == 'Senior' ? 'selected' : '' }}>Senior</option>
-                                        <option value="Lead" {{ request('experience_level') == 'Lead' ? 'selected' : '' }}>Lead</option>
-                                    </select>
-                                    <select name="employment_type" class="px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-                                        <option value="">Type d'emploi</option>
-                                        <option value="Full-time" {{ request('employment_type') == 'Full-time' ? 'selected' : '' }}>Temps plein</option>
-                                        <option value="Part-time" {{ request('employment_type') == 'Part-time' ? 'selected' : '' }}>Temps partiel</option>
-                                        <option value="Contract" {{ request('employment_type') == 'Contract' ? 'selected' : '' }}>Contrat</option>
-                                        <option value="Freelance" {{ request('employment_type') == 'Freelance' ? 'selected' : '' }}>Freelance</option>
-                                        <option value="Internship" {{ request('employment_type') == 'Internship' ? 'selected' : '' }}>Stage</option>
-                                    </select>
-                                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
+
                         
                         <!-- Job Listings -->
                         <div class="p-4">

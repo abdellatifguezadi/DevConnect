@@ -58,3 +58,4 @@ class commentNotification extends Notification
     {
         return ['database', 'broadcast']; 
 }
+}
