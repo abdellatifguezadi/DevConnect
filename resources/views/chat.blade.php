@@ -1,13 +1,13 @@
 <x-app-layout>
     <div class="container mx-auto pt-20 pb-4 min-h-screen">
-        <div class="flex border rounded-lg shadow-lg h-[calc(100vh-120px)] bg-white overflow-hidden">
+        <div class="flex border rounded-lg shadow-lg h-[calc(100vh-120px)] bg-white overflow-hidden mx-8">
             <!-- My Connections -->
             <div class="w-1/3 border-r bg-gray-50 flex flex-col">
                 <div class="p-4 border-b bg-white">
                     <h2 class="text-xl font-bold text-gray-800">Messages</h2>
                     <div class="mt-2 relative">
                         <input type="text" placeholder="Search conversations..." 
-                            class="w-full px-4 py-2 rounded-full bg-gray-100 focus:bg-white border focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-all duration-200">
+                            class="w-full px-4 py-2 rounded-full bg-gray-100 focus:bg-white border focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200">
                         <svg class="w-5 h-5 absolute right-3 top-2.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
@@ -21,9 +21,9 @@
                         <button class="w-full p-4 hover:bg-white flex items-center cursor-pointer connection-item transition-all duration-200"
                             data-user-id="{{ $otherUser->id }}"
                             data-user-name="{{ $otherUser->name }}"
-                            data-user-photo="{{ $otherUser->profile_picture ? Storage::url($otherUser->profile_picture) : asset('images/default-avatar.png')}}">
+                            data-user-photo="{{ $otherUser->profile?->avatar ?? 'https://avatar.iran.liara.run/public/boy' }}">
                             <div class="relative">
-                                <img src="{{ $user->profile?->avatar ?? 'https://avatar.iran.liara.run/public/boy' }}"
+                                <img src="{{ $otherUser->profile?->avatar ?? 'https://avatar.iran.liara.run/public/boy' }}"
                                     class="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm" alt="">
                                 <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-400 rounded-full border-2 border-white"></div>
                             </div>
@@ -98,7 +98,7 @@
                     <form id="message-form" class="flex items-end space-x-4">
                         <div class="flex-1 relative">
                             <textarea id="message-input"
-                                class="w-full px-4 py-3 rounded-lg bg-gray-100 focus:bg-white border focus:border-amber-500 focus:ring-2 focus:ring-amber-200 transition-all duration-200 resize-none"
+                                class="w-full px-4 py-3 rounded-lg bg-gray-100 focus:bg-white border focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 resize-none"
                                 rows="1" placeholder="Type your message..."></textarea>
                             <div class="absolute right-2 bottom-2 flex space-x-2">
                                 <button type="button" class="text-gray-400 hover:text-gray-600">
@@ -113,7 +113,7 @@
                                 </button>
                             </div>
                         </div>
-                        <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-white px-6 py-3 rounded-lg font-medium shadow-sm transition-all duration-200 flex items-center">
+                        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium shadow-sm transition-all duration-200 flex items-center">
                             <span>Send</span>
                             <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
@@ -213,9 +213,9 @@
 
                 // Highlight the selected connection
                 document.querySelectorAll('.connection-item').forEach(item => {
-                    item.classList.remove('bg-amber-50');
+                    item.classList.remove('bg-blue-50');
                 });
-                connectionItem.classList.add('bg-amber-50');
+                connectionItem.classList.add('bg-blue-50');
             });
 
             // Handle sending a message
@@ -266,7 +266,7 @@
                 console.log('Loading messages for recipient:', recipientId);
 
                 // Show loading indicator
-                messagesContainer.innerHTML = '<div class="flex justify-center py-4"><div class="animate-spin rounded-full h-6 w-6 border-t-2 border-amber-500"></div></div>';
+                messagesContainer.innerHTML = '<div class="flex justify-center py-4"><div class="animate-spin rounded-full h-6 w-6 border-t-2 border-blue-500"></div></div>';
 
                 fetch(`{{ url('chat/messages') }}/${recipientId}`)
                 .then(response => {
@@ -310,7 +310,7 @@
                 if (isSent) {
                     msgElement.innerHTML = `
                         <div class="max-w-[75%]">
-                            <div class="bg-amber-500 text-white p-3 rounded-2xl rounded-tr-none shadow-sm">
+                            <div class="bg-blue-500 text-white p-3 rounded-2xl rounded-tr-none shadow-sm">
                                 <p class="text-sm">${escapeHTML(msgText)}</p>
                             </div>
                             <div class="text-xs text-gray-500 mt-1 text-right">${time}</div>

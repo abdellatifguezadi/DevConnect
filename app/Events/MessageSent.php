@@ -60,7 +60,7 @@ class MessageSent implements ShouldBroadcast
             'user' => [
                 'id' => $this->user->id,
                 'name' => $this->user->name,
-                'profile_photo_path' => $this->user->profile_photo_path
+                'avatar' => $this->user->profile?->avatar ?? 'https://avatar.iran.liara.run/public/boy'
             ]
         ];
     }
