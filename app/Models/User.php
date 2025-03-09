@@ -145,4 +145,22 @@ class User extends Authenticatable
     //     $connection = $this->getConnectionStatus($otherUser);
     //     return $connection && $connection->status === 'pending';
     // }
+
+
+
+        /**
+     * Get the messages sent by the user.
+     */
+    public function sentMessages()
+    {
+        return $this->hasMany(Chat::class, 'from_user_id');
+    }
+
+    /**
+     * Get the messages received by the user.
+     */
+    public function receivedMessages()
+    {
+        return $this->hasMany(Chat::class, 'to_user_id');
+    }
 }
