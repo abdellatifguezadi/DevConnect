@@ -51,8 +51,7 @@ class ProfileController extends Controller
             'location' => 'nullable|string|max:255',
             'avatar' => 'nullable|image|max:2048',
             'cover_image' => 'nullable|image|max:2048',
-            'skills' => 'nullable|array',
-            'skills.*' => 'exists:skills,id',
+            'skills_input' => 'nullable|string|max:1000', 
             'name' => 'required|string|max:255',
         ]);
 
@@ -86,31 +85,32 @@ class ProfileController extends Controller
             'location'
         ]))->save();
 
-        if ($request->has('skills')) {
-            $user->skills()->sync($request->skills);
+       
+        if ($request->filled('skills_input')) {
+           
+            $skillNames = array_map('trim', explode(',', $request->skills_input));
+            $skillIds = [];
+
+            foreach ($skillNames as $name) {
+                if (!empty($name)) {
+                    
+                    $skill = \App\Models\Skill::firstOrCreate(
+                        ['name' => $name],
+                        ['category' => 'Général'] 
+                    );
+                    $skillIds[] = $skill->id;
+                }
+            }
+
+
+            $user->skills()->sync($skillIds);
         } else {
-            $user->skills()->detach(); 
+            $user->skills()->detach();
         }
 
         return back()->with('success', 'Profil mis à jour avec succès');
     }
 
 
-    public function destroy(Request $request): RedirectResponse
-    {
-        $request->validateWithBag('userDeletion', [
-            'password' => ['required', 'current_password'],
-        ]);
 
-        $user = $request->user();
-
-        Auth::logout();
-
-        $user->delete();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return Redirect::to('/');
-    }
 }
