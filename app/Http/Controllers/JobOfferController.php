@@ -16,22 +16,26 @@ class JobOfferController extends Controller
         $query = JobOffer::with('user.profile')
             ->active()
             ->orderBy('created_at', 'desc');
-            
 
 
-        
-        $jobOffers = $query->paginate(10);
-        
+
+
+        $jobOffers = JobOffer::where(function ($query) {
+            $query->whereNull('expiry_date')
+                ->orWhere('expiry_date', '>=', now());
+        })
+            ->paginate(10);
+
 
         $trendingTags = Hashtag::where('posts_count', '>', 0)
             ->orderBy('posts_count', 'desc')
             ->take(5)
             ->get();
-            
+
         $user = auth()->user();
         $postsCount = $user->posts()->count();
         $connectionsCount = $user->connections()->count();
-        
+
         return view('job-offers.index', compact('jobOffers', 'trendingTags', 'user', 'postsCount', 'connectionsCount'));
     }
 
@@ -58,9 +62,9 @@ class JobOfferController extends Controller
             'requirements' => 'nullable|string',
             'benefits' => 'nullable|string',
         ]);
-        
+
         $jobOffer = auth()->user()->jobOffers()->create($validated);
-        
+
         return redirect()->route('job-offers.show', $jobOffer)
             ->with('success', 'Offre d\'emploi créée avec succès!');
     }
@@ -74,15 +78,15 @@ class JobOfferController extends Controller
             ->orderBy('posts_count', 'desc')
             ->take(5)
             ->get();
-            
+
         $user = auth()->user();
         $postsCount = $user->posts()->count();
         $connectionsCount = $user->connections()->count();
-        
+
         return view('job-offers.show', compact('jobOffer', 'trendingTags', 'user', 'postsCount', 'connectionsCount'));
     }
 
- 
+
     public function edit(JobOffer $jobOffer)
     {
 
@@ -90,7 +94,7 @@ class JobOfferController extends Controller
             return redirect()->route('job-offers.index')
                 ->with('error', 'Vous n\'êtes pas autorisé à modifier cette offre d\'emploi.');
         }
-        
+
         return view('job-offers.edit', compact('jobOffer'));
     }
 
@@ -102,7 +106,7 @@ class JobOfferController extends Controller
             return redirect()->route('job-offers.index')
                 ->with('error', 'Vous n\'êtes pas autorisé à modifier cette offre d\'emploi.');
         }
-        
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'company_name' => 'required|string|max:255',
@@ -118,9 +122,9 @@ class JobOfferController extends Controller
             'benefits' => 'nullable|string',
             'status' => 'nullable|string|in:active,closed,filled',
         ]);
-        
+
         $jobOffer->update($validated);
-        
+
         return redirect()->route('job-offers.show', $jobOffer)
             ->with('success', 'Offre d\'emploi mise à jour avec succès!');
     }
@@ -133,9 +137,9 @@ class JobOfferController extends Controller
             return redirect()->route('job-offers.index')
                 ->with('error', 'Vous n\'êtes pas autorisé à supprimer cette offre d\'emploi.');
         }
-        
+
         $jobOffer->delete();
-        
+
         return redirect()->route('job-offers.index')
             ->with('success', 'Offre d\'emploi supprimée avec succès!');
     }

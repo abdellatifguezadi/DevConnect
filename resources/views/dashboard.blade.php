@@ -134,8 +134,6 @@
 @endif
 
 <script>
-
-
     function openEditPost(postId, content, language, codeSnippet, imageUrl, videoUrl) {
         console.log('Opening edit modal for post:', postId);
         const modal = document.getElementById('editPostModal');
@@ -143,13 +141,13 @@
             console.error('Edit post modal not found!');
             return;
         }
-        
+
         const form = document.getElementById('editPostForm');
         if (!form) {
             console.error('Edit post form not found!');
             return;
         }
-        
+
         const contentTextarea = document.getElementById('editPostContent');
         const languageInput = document.getElementById('editPostLanguage');
         const codeSnippetTextarea = document.getElementById('editPostCodeSnippet');
@@ -159,7 +157,7 @@
         const currentVideo = document.getElementById('currentVideo');
 
         form.action = `/posts/${postId}`;
-        
+
         if (contentTextarea) {
             contentTextarea.value = content || '';
         }
@@ -199,11 +197,11 @@
         const modal = document.getElementById('editPostModal');
         modal.classList.add('hidden');
     }
-    
+
 
 
     document.addEventListener('DOMContentLoaded', function() {
-   
+
         const createPostButtons = document.querySelectorAll('.open-create-post-btn');
         const createPostModal = document.getElementById('createPostModal');
 
@@ -229,6 +227,34 @@
             }
         });
     });
+
+    function toggleDropdown(postId) {
+        const dropdownMenu = document.getElementById(`dropdown-menu-${postId}`);
+        if (dropdownMenu) {
+            dropdownMenu.classList.toggle('hidden');
+
+            document.querySelectorAll('.dropdown-container .absolute').forEach(menu => {
+                if (menu.id !== `dropdown-menu-${postId}` && !menu.classList.contains('hidden')) {
+                    menu.classList.add('hidden');
+                }
+            });
+        }
+    }
+
+    function toggleShareDropdown(postId) {
+        const shareDropdown = document.getElementById(`share-dropdown-${postId}`);
+        if (shareDropdown) {
+            shareDropdown.classList.toggle('hidden');
+        }
+    }
+
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.dropdown-container')) {
+            document.querySelectorAll('.dropdown-container .absolute').forEach(menu => {
+                menu.classList.add('hidden');
+            });
+        }
+    });
 </script>
 
 <!-- Create Post Modal -->
@@ -241,39 +267,8 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
-            
-            <form action="{{ route('posts.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
-                @csrf
-                <div>
-                    <textarea name="content" rows="4" class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200" placeholder="Que voulez-vous partager ?"></textarea>
-                </div>
 
-                <div>
-                    <input type="text" name="language" class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200" placeholder="Langage de programmation (optionnel)">
-                </div>
-
-                <div>
-                    <textarea name="code_snippet" rows="4" class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200" placeholder="Ajouter un extrait de code (optionnel)"></textarea>
-                </div>
-
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Image</label>
-                        <input type="file" name="images[]" accept="image/*" class="mt-1" multiple>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Vidéo</label>
-                        <input type="file" name="videos[]" accept="video/*" class="mt-1" multiple>
-                    </div>
-                </div>
-
-                <div class="flex justify-end">
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                        Publier
-                    </button>
-                </div>
-            </form>
+            <x-create-post-form />
         </div>
     </div>
 </div>
@@ -291,5 +286,3 @@
         </div>
     </div>
 </div>
-
-

@@ -51,26 +51,16 @@
                     class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
             </div>
         </div>
-        <div class="space-y-4 mt-6">
-            <label class="block text-sm font-medium text-gray-700 text-left mb-2">Compétences</label>
-            <div class="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto p-4 bg-gray-50 rounded-xl">
-                @foreach(App\Models\Skill::all() as $skill)
-                <div class="flex items-center">
-                    <input type="checkbox"
-                        name="skills[]"
-                        value="{{ $skill->id }}"
-                        id="skill-{{ $skill->id }}"
-                        class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                        {{ $userSkills->contains('id', $skill->id) ? 'checked' : '' }}>
-                    <label for="skill-{{ $skill->id }}"
-                        class="ml-2 text-sm text-gray-700">
-                        {{ $skill->name }}
-                    </label>
-                </div>
-                @endforeach
-            </div>
+        <div class="mt-4">
+            <label for="skills_input" class="block text-sm font-medium text-gray-700">Compétences</label>
+            <input id="skills_input"
+                class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                type="text"
+                name="skills_input"
+                placeholder="JavaScript, PHP, Java, Python..."
+                value="{{ $userSkills->pluck('name')->implode(', ') }}" />
+            <p class="text-sm text-gray-500 mt-1">Séparez les compétences par des virgules</p>
         </div>
-
     </div>
     <div class="flex justify-end space-x-3 mt-8">
         <button type="button" onclick="closeEditProfile()"
